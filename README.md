@@ -8,71 +8,54 @@ This project analyzes quarterly earnings call transcripts to predict stock perfo
 
 ## 🏗️ Architecture
 
+### Current Implementation (Phase 1)
+
+```mermaid
+graph LR
+    User[👤 User] --> Frontend[📱 Next.js Frontend<br/>Tailwind CSS]
+    Frontend --> API[🔌 API Gateway]
+    API --> Lambda1[⚡ Sentiment Analysis]
+    API --> Lambda2[📈 Stock Data]
+    API --> Lambda3[🤖 Price Prediction]
+    
+    Lambda1 --> S3[📦 S3: ML Models]
+    Lambda2 --> DynamoDB1[🗄️ DynamoDB: Cache]
+    Lambda3 --> DynamoDB2[🗄️ DynamoDB: Results]
+    
+    Lambda2 --> AlphaVantage[📊 Alpha Vantage API]
+    Lambda1 --> SEC[🏛️ SEC EDGAR API]
+```
+
+### Planned Features (Phases 2-4)
+
 ```mermaid
 graph TB
-    subgraph "Phase 1: Core Infrastructure ✅"
-        U1[User] --> FE1[Next.js Frontend<br/>AWS Amplify]
-        FE1 --> AG1[API Gateway<br/>v1 Stage]
-        AG1 --> L1[Sentiment Lambda]
-        AG1 --> L2[Stock Data Lambda]
-        AG1 --> L3[Prediction Lambda]
-        L1 --> S31[S3: ML Models]
-        L2 --> S32[S3: Earnings Data]
-        L3 --> S31
-        L1 --> D1[DynamoDB: Sentiment Results]
-        L2 --> D2[DynamoDB: Earnings Cache]
-        L3 --> D3[DynamoDB: Stock Prices]
+    subgraph "Phase 2: Automation"
+        Calendar[📅 Earnings Calendar]
+        Scheduler[⏰ Scheduled Processing]
+        EventBridge[📡 EventBridge]
     end
-
-    subgraph "Phase 2: Earnings Calendar & Automation"
-        AG1 --> L4[Scheduled Processing Lambda]
-        L4 --> EB1[EventBridge Rules<br/>Daily/Weekly Triggers]
-        L4 --> D4[DynamoDB: Earnings Calendar]
-        L4 --> D5[DynamoDB: Sentiment History]
-        FE1 --> CAL[Calendar Dashboard<br/>Component]
+    
+    subgraph "Phase 3: User Management" 
+        Auth[🔐 Cognito Auth]
+        Portfolio[💼 Portfolio Tracking]
+        Notifications[📧 Email Alerts]
     end
-
-    subgraph "Phase 3: Portfolio Management"
-        U2[Authenticated User] --> AUTH[Cognito User Pool]
-        AUTH --> FE1
-        FE1 --> L5[Portfolio Analysis Lambda]
-        L5 --> D6[DynamoDB: User Portfolios]
-        L5 --> D7[DynamoDB: User Preferences]
-        L5 --> SQS1[SQS: Async Processing]
-        SQS1 --> L6[Portfolio Processing Lambda]
-        L6 --> SNS1[SNS: Email Notifications]
+    
+    subgraph "Phase 4: Analytics"
+        Sectors[🏭 Sector Analysis]
+        ModelPerf[📊 Model Performance]
+        Reports[📄 Advanced Reports]
     end
-
-    subgraph "Phase 4: Advanced Analytics"
-        FE1 --> L7[Sector Analysis Lambda]
-        L7 --> D8[DynamoDB: Sector Data]
-        FE1 --> L8[Model Performance Lambda]
-        L8 --> D9[DynamoDB: Model Metrics]
-        L8 --> CW1[CloudWatch Metrics]
-        AG1 --> L9[Advanced Reporting Lambda]
-        L9 --> S33[S3: Report Storage]
-    end
-
-    subgraph "External APIs"
-        L2 --> API1[Alpha Vantage API<br/>Stock Data]
-        L1 --> API2[Earnings Transcript APIs<br/>SEC EDGAR]
-    end
-
-    subgraph "State Management"
-        TF1[Terraform State<br/>S3 + DynamoDB Lock]
-        KMS1[KMS Encryption<br/>State & Data]
-    end
-
-    classDef deployed fill:#90EE90,stroke:#333,stroke-width:2px
-    classDef planned fill:#FFE4B5,stroke:#333,stroke-width:2px
-    classDef external fill:#ADD8E6,stroke:#333,stroke-width:2px
-
-    class U1,FE1,AG1,L1,L2,L3,S31,S32,D1,D2,D3,TF1,KMS1 deployed
-    class L4,EB1,D4,D5,CAL planned
-    class U2,AUTH,L5,D6,D7,SQS1,L6,SNS1 planned
-    class L7,D8,L8,D9,CW1,L9,S33 planned
-    class API1,API2 external
 ```
+
+### Tech Stack
+
+- **Frontend**: Next.js 15, React 19, Tailwind CSS
+- **Backend**: AWS Lambda, API Gateway, DynamoDB
+- **ML**: Python, scikit-learn, sentiment analysis models
+- **Infrastructure**: Terraform, AWS Amplify
+- **APIs**: Alpha Vantage (stock data), SEC EDGAR (earnings)
 
 ## 📊 Deployment Status
 
