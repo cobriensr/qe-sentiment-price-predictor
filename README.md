@@ -6,6 +6,10 @@ A machine learning application that analyzes earnings call sentiment to predict 
 
 This project analyzes quarterly earnings call transcripts to predict stock performance over time. Instead of focusing on immediate market reactions, it examines the sustained impact of management sentiment on stock movements between earnings calls (e.g., March earnings → June performance).
 
+## Landing Page
+
+![Landing Page](frontend/assets/landing-page.png)
+
 ## 🏗️ Architecture
 
 ### Current Implementation (Phase 1)
