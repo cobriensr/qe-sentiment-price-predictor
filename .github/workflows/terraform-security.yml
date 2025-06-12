@@ -1,0 +1,108 @@
+name: Security Scans
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'terraform/**'
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'  # Daily scan
+permissions:
+  security-events: write
+  contents: read
+  pull-requests: write
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run tfsec
+        uses: aquasecurity/tfsec-sarif-action@v0.1.4
+        continue-on-error: true
+        with:
+          sarif_file: trivy-terraform-scan.sarif
+    
+      - name: Run Terrascan
+        uses: tenable/terrascan-action@main
+        with:
+          iac_type: 'terraform'
+          iac_version: 'v14'
+          policy_type: 'aws'
+          verbose: true
+          only_warn: true
+          sarif_upload: true
+          iac_dir: 'terraform'
+
+      - name: Upload Terrascan SARIF results
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: terrascan.sarif
+          wait-for-processing: true
+
+      # Debug step to list available SARIF files
+      - name: List SARIF files
+        run: |
+          echo "Available SARIF files:"
+          ls -la trivy-*.sarif || echo "No trivy SARIF files found"
+
+      - name: Create summary report
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "## Security Scan Summary" > summary.md
+          
+          echo "### Trivy Filesystem Scan" >> summary.md
+          if [ -f trivy-fs-results.sarif ]; then
+            jq -r '.runs[].results[] | "- \(.level): \(.message.text)"' trivy-fs-results.sarif >> summary.md || echo "No filesystem vulnerabilities found" >> summary.md
+          else
+            echo "Filesystem scan was not completed" >> summary.md
+          fi
+          
+          echo "### Trivy Configuration Scan" >> summary.md
+          if [ -f trivy-config-results.sarif ]; then
+            jq -r '.runs[].results[] | "- \(.level): \(.message.text)"' trivy-config-results.sarif >> summary.md || echo "No configuration vulnerabilities found" >> summary.md
+          else
+            echo "Configuration scan was not completed" >> summary.md
+          fi
+          
+          echo "### Docker Image Scans" >> summary.md
+          for lambda in 1 2 3; do
+            echo "#### Lambda$lambda" >> summary.md
+            if [ -f "trivy-docker-lambda$lambda.sarif" ]; then
+              jq -r '.runs[].results[] | "- \(.level): \(.message.text)"' "trivy-docker-lambda$lambda.sarif" >> summary.md || echo "No vulnerabilities found" >> summary.md
+            else
+              echo "Docker scan was not completed" >> summary.md
+            fi
+          done
+          
+          echo "### Terraform Scan" >> summary.md
+          if [ -f trivy-terraform-scan.sarif ]; then
+            jq -r '.runs[].results[] | "- \(.level): \(.message.text)"' trivy-terraform-scan.sarif >> summary.md || echo "No Terraform vulnerabilities found" >> summary.md
+          else
+            echo "Terraform scan was not completed" >> summary.md
+          fi
+          
+          echo "### Python Dependencies Scan" >> summary.md
+          for dir in src/lambda*; do
+            if [ -f "$dir/safety-report.json" ]; then
+              echo "#### $dir" >> summary.md
+              jq -r '.[] | "- \(.dependency): \(.vulnerability)"' "$dir/safety-report.json" >> summary.md || echo "No Python vulnerabilities found" >> summary.md
+            else
+              echo "#### $dir" >> summary.md
+              echo "Python dependency scan was not completed" >> summary.md
+            fi
+          done
+
+      - name: Comment PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const summary = fs.readFileSync('summary.md', 'utf8');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: summary
+            });
