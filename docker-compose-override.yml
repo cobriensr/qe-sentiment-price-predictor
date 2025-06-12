@@ -1,0 +1,18 @@
+# Development overrides
+# Use: docker-compose -f docker-compose.yml -f docker-compose.override.yml up
+---
+# docker-compose.override.yml (automatically loaded)
+version: '3.8'
+
+services:
+  frontend:
+    environment:
+      - WATCHPACK_POLLING=true  # For file watching in Docker
+    command: npm run dev
+
+  backend:
+    environment:
+      - PYTHONPATH=/app
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+    command: python -m uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload

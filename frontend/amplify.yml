@@ -1,0 +1,78 @@
+version: 1
+applications:
+  - appRoot: frontend
+    frontend:
+      phases:
+        preBuild:
+          commands:
+            - echo "Installing dependencies..."
+            - npm ci
+            
+        build:
+          commands:
+            - echo "Building Next.js application..."
+            - echo "Environment: $AMPLIFY_BRANCH"
+            - echo "API URL: $NEXT_PUBLIC_API_URL"
+            - npm run build
+            
+        postBuild:
+          commands:
+            - echo "Build completed successfully"
+            - echo "Checking build output..."
+            - ls -la .next/
+            
+      artifacts:
+        # Next.js static export output
+        baseDirectory: .next
+        files:
+          - '**/*'
+          
+      cache:
+        paths:
+          - node_modules/**/*
+          - .next/cache/**/*
+          
+    # Environment variables per branch
+    environmentVariables:
+      # These will be overridden by branch-specific settings
+      - NEXT_PUBLIC_ENVIRONMENT: $AMPLIFY_BRANCH
+      - NODE_ENV: production
+
+# Custom headers for security and CORS      
+customHeaders:
+    - pattern: '**'
+      headers:
+        - key: 'X-Frame-Options'
+          value: 'DENY'
+        - key: 'X-Content-Type-Options'
+          value: 'nosniff'
+        - key: 'Referrer-Policy'
+          value: 'strict-origin-when-cross-origin'
+        - key: 'Permissions-Policy'
+          value: 'camera=(), microphone=(), geolocation=()'
+          
+    # API proxy for development (optional)
+    - pattern: '/api/**'
+      headers:
+        - key: 'Access-Control-Allow-Origin'
+          value: '*'
+        - key: 'Access-Control-Allow-Headers'
+          value: 'Content-Type, Authorization'
+        - key: 'Access-Control-Allow-Methods'
+          value: 'GET, POST, PUT, DELETE, OPTIONS'
+
+# Branch-specific configurations
+branches:
+  main:
+    # Production branch configuration
+    environmentVariables:
+      - NEXT_PUBLIC_API_URL: https://your-api-id.execute-api.us-east-1.amazonaws.com/v1
+      - NEXT_PUBLIC_ENVIRONMENT: prod
+      - NEXT_PUBLIC_GOOGLE_ANALYTICS_ID: GA_TRACKING_ID_PROD
+      
+  develop:
+    # Development branch configuration  
+    environmentVariables:
+      - NEXT_PUBLIC_API_URL: https://your-dev-api-id.execute-api.us-east-1.amazonaws.com/v1
+      - NEXT_PUBLIC_ENVIRONMENT: dev
+      - NEXT_PUBLIC_GOOGLE_ANALYTICS_ID: GA_TRACKING_ID_DEV
