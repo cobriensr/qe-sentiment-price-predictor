@@ -6,17 +6,20 @@ applications:
         preBuild:
           commands:
             - echo "Installing dependencies..."
+            - cd frontend
             - npm ci
         build:
           commands:
             - echo "Building Next.js application for SSR..."
             - echo "Environment $AMPLIFY_BRANCH"
             - echo "API URL $NEXT_PUBLIC_API_URL"
+            - cd frontend
             - npm run build
         postBuild:
           commands:
             - echo "Build completed successfully"
             - echo "Checking build output..."
+            - cd frontend
             - ls -la .next/
       artifacts:
         baseDirectory: .next
