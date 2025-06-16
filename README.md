@@ -21,11 +21,11 @@ graph LR
     API --> Lambda1[⚡ Sentiment Analysis]
     API --> Lambda2[📈 Stock Data]
     API --> Lambda3[🤖 Price Prediction]
-    
+
     Lambda1 --> S3[📦 S3: ML Models]
     Lambda2 --> DynamoDB1[🗄️ DynamoDB: Cache]
     Lambda3 --> DynamoDB2[🗄️ DynamoDB: Results]
-    
+
     Lambda2 --> AlphaVantage[📊 Alpha Vantage API]
     Lambda1 --> SEC[🏛️ SEC EDGAR API]
 ```
@@ -39,13 +39,13 @@ graph TB
         Scheduler[⏰ Scheduled Processing]
         EventBridge[📡 EventBridge]
     end
-    
-    subgraph "Phase 3: User Management" 
+
+    subgraph "Phase 3: User Management"
         Auth[🔐 Cognito Auth]
         Portfolio[💼 Portfolio Tracking]
         Notifications[📧 Email Alerts]
     end
-    
+
     subgraph "Phase 4: Analytics"
         Sectors[🏭 Sector Analysis]
         ModelPerf[📊 Model Performance]
@@ -196,7 +196,7 @@ AMPLIFY_APP_ID_DEV="your-amplify-app-id"
 
 ## 📁 Project Structure
 
-``` bash
+```bash
 earnings-sentiment-analyzer/
 ├── frontend/                 # Next.js application
 │   ├── src/
@@ -267,6 +267,11 @@ Each phase builds incrementally on the previous infrastructure, adding new capab
 - Auto-scaling based on demand
 - Reserved capacity for predictable workloads
 - Lifecycle policies for data archival
+
+## Deploying to Amplify
+
+- When deploying to amplify you might need to copy and paste the contents of amplify.ymnl into the build settings.
+- Sometimes Amplify gets "stuck" with certain configurations and may require manual intervention.
 
 ## 🤝 Contributing
 
