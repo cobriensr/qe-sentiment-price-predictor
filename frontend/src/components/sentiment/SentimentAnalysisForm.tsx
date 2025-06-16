@@ -2,19 +2,13 @@
 'use client'
 
 import { Search, Loader2 } from 'lucide-react'
-
-interface SentimentAnalysisFormProps {
-  symbol: string
-  onSymbolChange: (symbol: string) => void
-  onSubmit: (e: React.FormEvent) => void
-  loading: boolean
-}
+import SentimentAnalysisFormProps from '@/types/sentimentanalysisformprops'
 
 export default function SentimentAnalysisForm({
   symbol,
   onSymbolChange,
   onSubmit,
-  loading
+  loading,
 }: Readonly<SentimentAnalysisFormProps>) {
   return (
     <div className="mb-8">
@@ -25,7 +19,7 @@ export default function SentimentAnalysisForm({
             type="text"
             placeholder="Enter stock symbol (e.g., AAPL)"
             value={symbol}
-            onChange={(e) => onSymbolChange(e.target.value)}
+            onChange={e => onSymbolChange(e.target.value)}
             className="w-full pl-10 pr-4 py-3 border border-input bg-background rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
             disabled={loading}
           />

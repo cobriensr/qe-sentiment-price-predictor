@@ -27,7 +27,7 @@ export default function Navbar() {
               Earnings Sentiment Analyzer
             </Link>
             <div className="hidden md:flex space-x-6">
-              {navItems.map((item) => (
+              {navItems.map(item => (
                 <Link
                   key={item.href}
                   href={item.href}
@@ -43,8 +43,8 @@ export default function Navbar() {
             </div>
           </div>
           <div className="flex items-center space-x-4">
-            <Link 
-              href="/analyze" 
+            <Link
+              href="/analyze"
               className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
             >
               Start Analyzing

@@ -1,19 +1,7 @@
 // src/components/portfolio/PortfolioSummaryCards.tsx
 import { BarChart3, TrendingUp, TrendingDown, Calendar } from 'lucide-react'
 import SentimentBadge from '@/components/sentiment/SentimentBadge'
-
-interface PortfolioSummary {
-  totalValue: number
-  totalCost: number
-  totalReturn: number
-  totalReturnPercent: number
-  avgSentiment: number
-  upcomingEarnings: number
-}
-
-interface PortfolioSummaryCardsProps {
-  readonly summary: PortfolioSummary
-}
+import PortfolioSummaryCardsProps from '@/types/portfoliosummarycardsprops'
 
 export default function PortfolioSummaryCards({ summary }: PortfolioSummaryCardsProps) {
   const formatCurrency = (value: number) => {
@@ -51,10 +39,14 @@ export default function PortfolioSummaryCards({ summary }: PortfolioSummaryCards
           )}
           <span className="text-sm font-medium text-muted-foreground">Total Return</span>
         </div>
-        <div className={`text-2xl font-bold ${summary.totalReturn >= 0 ? 'text-sentiment-positive' : 'text-sentiment-negative'}`}>
+        <div
+          className={`text-2xl font-bold ${summary.totalReturn >= 0 ? 'text-sentiment-positive' : 'text-sentiment-negative'}`}
+        >
           {formatCurrency(summary.totalReturn)}
         </div>
-        <div className={`text-sm ${summary.totalReturn >= 0 ? 'text-sentiment-positive' : 'text-sentiment-negative'}`}>
+        <div
+          className={`text-sm ${summary.totalReturn >= 0 ? 'text-sentiment-positive' : 'text-sentiment-negative'}`}
+        >
           {formatPercent(summary.totalReturnPercent)}
         </div>
       </div>

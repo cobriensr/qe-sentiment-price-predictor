@@ -1,19 +1,6 @@
 // src/components/sentiment/SentimentSummaryCards.tsx
 import { TrendingUp, TrendingDown, Calendar, BarChart3 } from 'lucide-react'
-
-interface SentimentResult {
-  symbol: string
-  sentiment: number
-  confidence: number
-  prediction: string
-  predictionValue: number
-  earningsDate: string
-  targetDate: string
-}
-
-interface SentimentSummaryCardsProps {
-  result: SentimentResult
-}
+import SentimentSummaryCardsProps from '@/types/sentimentsummarycardsprops'
 
 export default function SentimentSummaryCards({ result }: Readonly<SentimentSummaryCardsProps>) {
   const getSentimentLabel = (sentiment: number) => {
@@ -44,10 +31,13 @@ export default function SentimentSummaryCards({ result }: Readonly<SentimentSumm
             {(result.sentiment * 100).toFixed(0)}% positive
           </div>
           <div className="w-full bg-secondary rounded-full h-2">
-            <div 
+            <div
               className={`h-2 rounded-full transition-all duration-300 ${
-                result.sentiment >= 0.7 ? 'bg-sentiment-positive' :
-                result.sentiment >= 0.4 ? 'bg-sentiment-neutral' : 'bg-sentiment-negative'
+                result.sentiment >= 0.7
+                  ? 'bg-sentiment-positive'
+                  : result.sentiment >= 0.4
+                    ? 'bg-sentiment-neutral'
+                    : 'bg-sentiment-negative'
               }`}
               style={{ width: `${result.sentiment * 100}%` }}
             />
@@ -75,7 +65,9 @@ export default function SentimentSummaryCards({ result }: Readonly<SentimentSumm
           )}
           <span className="text-sm font-medium text-muted-foreground">90-Day Prediction</span>
         </div>
-        <div className={`text-2xl font-bold ${result.predictionValue >= 0 ? 'text-sentiment-positive' : 'text-sentiment-negative'}`}>
+        <div
+          className={`text-2xl font-bold ${result.predictionValue >= 0 ? 'text-sentiment-positive' : 'text-sentiment-negative'}`}
+        >
           {result.prediction}
         </div>
         <div className="text-sm text-muted-foreground">Expected return</div>

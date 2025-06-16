@@ -1,25 +1,21 @@
 // src/components/sentiment/SentimentCharts.tsx
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts'
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+} from 'recharts'
+import SentimentChartsProps from '@/types/sentimentchartsprops'
 
-interface HistoricalData {
-  date: string
-  price: number
-  sentiment?: number
-}
-
-interface SentimentHistory {
-  quarter: string
-  sentiment: number
-  actualReturn: number
-  predictedReturn: number
-}
-
-interface SentimentChartsProps {
-  readonly historicalData: ReadonlyArray<HistoricalData>
-  readonly sentimentHistory: ReadonlyArray<SentimentHistory>
-}
-
-export default function SentimentCharts({ historicalData, sentimentHistory }: SentimentChartsProps) {
+export default function SentimentCharts({
+  historicalData,
+  sentimentHistory,
+}: Readonly<SentimentChartsProps>) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
       {/* Historical Price & Sentiment */}
@@ -33,19 +29,19 @@ export default function SentimentCharts({ historicalData, sentimentHistory }: Se
               <YAxis yAxisId="price" />
               <YAxis yAxisId="sentiment" orientation="right" domain={[0, 1]} />
               <Tooltip />
-              <Line 
+              <Line
                 yAxisId="price"
-                type="monotone" 
-                dataKey="price" 
-                stroke="#3B82F6" 
+                type="monotone"
+                dataKey="price"
+                stroke="#3B82F6"
                 strokeWidth={2}
                 name="Stock Price ($)"
               />
-              <Line 
+              <Line
                 yAxisId="sentiment"
-                type="monotone" 
-                dataKey="sentiment" 
-                stroke="#10B981" 
+                type="monotone"
+                dataKey="sentiment"
+                stroke="#10B981"
                 strokeWidth={2}
                 strokeDasharray="5 5"
                 name="Sentiment Score"

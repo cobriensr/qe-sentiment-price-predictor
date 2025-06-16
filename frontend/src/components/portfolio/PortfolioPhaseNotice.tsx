@@ -9,8 +9,8 @@ export default function PortfolioPhaseNotice() {
         <span className="font-medium">Phase 3 Feature Preview</span>
       </div>
       <p className="text-sm text-blue-700 mt-1">
-        Portfolio management will be available in Phase 3 with user authentication and real portfolio tracking. 
-        This is a preview with sample data.
+        Portfolio management will be available in Phase 3 with user authentication and real
+        portfolio tracking. This is a preview with sample data.
       </p>
     </div>
   )

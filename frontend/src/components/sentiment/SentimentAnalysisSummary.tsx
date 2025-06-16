@@ -1,15 +1,9 @@
 // src/components/sentiment/SentimentAnalysisSummary.tsx
-interface SentimentResult {
-  sentiment: number
-  confidence: number
-  targetDate: string
-}
+import SentimentAnalysisSummaryProps from '@/types/sentimentanalysissummaryprops'
 
-interface SentimentAnalysisSummaryProps {
-  result: SentimentResult
-}
-
-export default function SentimentAnalysisSummary({ result }: Readonly<SentimentAnalysisSummaryProps>) {
+export default function SentimentAnalysisSummary({
+  result,
+}: Readonly<SentimentAnalysisSummaryProps>) {
   const getSentimentLabel = (sentiment: number) => {
     if (sentiment >= 0.7) return 'Bullish'
     if (sentiment >= 0.4) return 'Neutral'
@@ -24,8 +18,14 @@ export default function SentimentAnalysisSummary({ result }: Readonly<SentimentA
           <div>
             <h4 className="font-medium mb-2">Key Insights</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>• Management tone indicates {getSentimentLabel(result.sentiment).toLowerCase()} outlook</li>
-              <li>• Sentiment score of {(result.sentiment * 100).toFixed(0)}% based on earnings transcript analysis</li>
+              <li>
+                • Management tone indicates {getSentimentLabel(result.sentiment).toLowerCase()}{' '}
+                outlook
+              </li>
+              <li>
+                • Sentiment score of {(result.sentiment * 100).toFixed(0)}% based on earnings
+                transcript analysis
+              </li>
               <li>• Historical model accuracy: 85% within ±5% of actual returns</li>
               <li>• Prediction valid until next earnings on {result.targetDate}</li>
             </ul>
@@ -35,7 +35,10 @@ export default function SentimentAnalysisSummary({ result }: Readonly<SentimentA
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>• Market conditions may override sentiment signals</li>
               <li>• External events can impact stock performance</li>
-              <li>• Model confidence of {(result.confidence * 100).toFixed(0)}% suggests moderate certainty</li>
+              <li>
+                • Model confidence of {(result.confidence * 100).toFixed(0)}% suggests moderate
+                certainty
+              </li>
               <li>• Consider diversification and position sizing</li>
             </ul>
           </div>

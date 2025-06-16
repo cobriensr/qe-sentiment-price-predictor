@@ -2,27 +2,11 @@
 import Link from 'next/link'
 import { TrendingUp, TrendingDown, BarChart3 } from 'lucide-react'
 import SentimentBadge from '@/components/sentiment/SentimentBadge'
+import PortfolioHoldingsTableProps from '@/types/portfolioholdingstableprops'
 
-export interface PortfolioHolding {
-  symbol: string
-  company: string
-  shares: number
-  avgCost: number
-  currentPrice: number
-  marketValue: number
-  totalReturn: number
-  totalReturnPercent: number
-  lastSentiment?: number
-  nextEarnings?: string
-  sentimentTrend: 'up' | 'down' | 'stable'
-  riskLevel: 'low' | 'medium' | 'high'
-}
-
-interface PortfolioHoldingsTableProps {
-  readonly holdings: ReadonlyArray<PortfolioHolding>
-}
-
-export default function PortfolioHoldingsTable({ holdings }: PortfolioHoldingsTableProps) {
+export default function PortfolioHoldingsTable({
+  holdings,
+}: Readonly<PortfolioHoldingsTableProps>) {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -38,9 +22,12 @@ export default function PortfolioHoldingsTable({ holdings }: PortfolioHoldingsTa
 
   const getSentimentTrendIcon = (trend: string) => {
     switch (trend) {
-      case 'up': return <TrendingUp className="h-3 w-3 text-sentiment-positive" />
-      case 'down': return <TrendingDown className="h-3 w-3 text-sentiment-negative" />
-      default: return <BarChart3 className="h-3 w-3 text-muted-foreground" />
+      case 'up':
+        return <TrendingUp className="h-3 w-3 text-sentiment-positive" />
+      case 'down':
+        return <TrendingDown className="h-3 w-3 text-sentiment-negative" />
+      default:
+        return <BarChart3 className="h-3 w-3 text-muted-foreground" />
     }
   }
 
@@ -48,10 +35,12 @@ export default function PortfolioHoldingsTable({ holdings }: PortfolioHoldingsTa
     const colors = {
       low: 'bg-green-100 text-green-800 border-green-200',
       medium: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      high: 'bg-red-100 text-red-800 border-red-200'
+      high: 'bg-red-100 text-red-800 border-red-200',
     }
     return (
-      <span className={`px-2 py-1 text-xs rounded-full border ${colors[risk as keyof typeof colors]}`}>
+      <span
+        className={`px-2 py-1 text-xs rounded-full border ${colors[risk as keyof typeof colors]}`}
+      >
         {risk.toUpperCase()}
       </span>
     )
@@ -91,7 +80,7 @@ export default function PortfolioHoldingsTable({ holdings }: PortfolioHoldingsTa
             </tr>
           </thead>
           <tbody>
-            {holdings.map((holding) => (
+            {holdings.map(holding => (
               <tr key={holding.symbol} className="border-b hover:bg-secondary/20 transition-colors">
                 <td className="p-4">
                   <div className="flex items-center gap-3">
@@ -104,26 +93,37 @@ export default function PortfolioHoldingsTable({ holdings }: PortfolioHoldingsTa
                 <td className="p-4 text-right">{holding.shares}</td>
                 <td className="p-4 text-right">${holding.avgCost.toFixed(2)}</td>
                 <td className="p-4 text-right">${holding.currentPrice.toFixed(2)}</td>
-                <td className="p-4 text-right font-medium">{formatCurrency(holding.marketValue)}</td>
+                <td className="p-4 text-right font-medium">
+                  {formatCurrency(holding.marketValue)}
+                </td>
                 <td className="p-4 text-right">
-                  <div className={`font-medium ${holding.totalReturn >= 0 ? 'text-sentiment-positive' : 'text-sentiment-negative'}`}>
+                  <div
+                    className={`font-medium ${holding.totalReturn >= 0 ? 'text-sentiment-positive' : 'text-sentiment-negative'}`}
+                  >
                     {formatCurrency(holding.totalReturn)}
                   </div>
-                  <div className={`text-sm ${holding.totalReturn >= 0 ? 'text-sentiment-positive' : 'text-sentiment-negative'}`}>
+                  <div
+                    className={`text-sm ${holding.totalReturn >= 0 ? 'text-sentiment-positive' : 'text-sentiment-negative'}`}
+                  >
                     {formatPercent(holding.totalReturnPercent)}
                   </div>
                 </td>
                 <td className="p-4 text-center">
                   <div className="flex items-center justify-center gap-1">
-                    {holding.lastSentiment && <SentimentBadge sentiment={holding.lastSentiment} size="sm" />}
+                    {holding.lastSentiment && (
+                      <SentimentBadge sentiment={holding.lastSentiment} size="sm" />
+                    )}
                     {getSentimentTrendIcon(holding.sentimentTrend)}
                   </div>
                 </td>
-                <td className="p-4 text-center">
-                  {getRiskBadge(holding.riskLevel)}
-                </td>
+                <td className="p-4 text-center">{getRiskBadge(holding.riskLevel)}</td>
                 <td className="p-4 text-center text-sm">
-                  {holding.nextEarnings ? new Date(holding.nextEarnings).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '-'}
+                  {holding.nextEarnings
+                    ? new Date(holding.nextEarnings).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                      })
+                    : '-'}
                 </td>
                 <td className="p-4 text-center">
                   <Link

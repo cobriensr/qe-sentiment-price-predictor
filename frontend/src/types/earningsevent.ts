@@ -9,4 +9,4 @@ interface EarningsEvent {
   importance: 'high' | 'medium' | 'low'
 }
 
-export default EarningsEvent;
+export default EarningsEvent
