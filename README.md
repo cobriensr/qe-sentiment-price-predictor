@@ -66,7 +66,7 @@ graph TB
 ### ✅ Phase 1: Core Infrastructure (DEPLOYED)
 
 - **Frontend**: Next.js app ready for Amplify deployment
-- **API Gateway**: `https://9amxu5wdjf.execute-api.us-east-1.amazonaws.com/v1`
+- **API Gateway**: API Gateway deployed
 - **Lambda Functions**: 3 functions with placeholder code
 - **Storage**: S3 buckets and DynamoDB tables configured
 - **Security**: IAM roles, encryption, and access controls
