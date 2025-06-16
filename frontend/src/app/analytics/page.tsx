@@ -2,7 +2,7 @@
 'use client'
 
 import { useState } from 'react'
-import Navbar from '@/components/ui/NavBar'
+import NavBar from '@/components/ui/NavBar'
 import AnalyticsPageHeader from '@/components/analytics/AnalyticsPageHeader'
 import AnalyticsPhaseNotice from '@/components/analytics/AnalyticsPhaseNotice'
 import AnalyticsKeyMetrics from '@/components/analytics/AnalyticsKeyMetrics'
@@ -129,7 +129,7 @@ export default function AnalyticsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      <NavBar />
 
       <div className="container mx-auto px-4 py-8">
         <AnalyticsPageHeader onRefresh={handleRefresh} onExport={handleExport} />
