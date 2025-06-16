@@ -136,7 +136,8 @@
     "**/*.jsx",
     ".next/types/**/*.ts",
     "./src/**/*",
-    "./public/**/*"
+    "./public/**/*",
+    "postcss.config.mjs"
   ],
   "exclude": [
     "node_modules",

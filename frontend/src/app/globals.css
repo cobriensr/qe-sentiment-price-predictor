@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @layer base {
   :root {
@@ -97,116 +97,15 @@
 }
 
 @layer utilities {
-  /* Custom color utilities */
-  .border-border {
-    border-color: hsl(var(--border));
-  }
-  .bg-background {
-    background-color: hsl(var(--background));
-  }
-  .text-foreground {
-    color: hsl(var(--foreground));
-  }
-  .bg-foreground {
-    background-color: hsl(var(--foreground));
-  }
-  .text-background {
-    color: hsl(var(--background));
-  }
-  .bg-card {
-    background-color: hsl(var(--card));
-  }
-  .text-card-foreground {
-    color: hsl(var(--card-foreground));
-  }
-  .bg-card-foreground {
-    background-color: hsl(var(--card-foreground));
-  }
-  .bg-popover {
-    background-color: hsl(var(--popover));
-  }
-  .text-popover-foreground {
-    color: hsl(var(--popover-foreground));
-  }
-  .bg-primary {
-    background-color: hsl(var(--primary));
-  }
-  .text-primary {
-    color: hsl(var(--primary));
-  }
-  .bg-primary-foreground {
-    background-color: hsl(var(--primary-foreground));
-  }
-  .text-primary-foreground {
-    color: hsl(var(--primary-foreground));
-  }
-  .bg-secondary {
-    background-color: hsl(var(--secondary));
-  }
-  .text-secondary {
-    color: hsl(var(--secondary));
-  }
-  .bg-secondary-foreground {
-    background-color: hsl(var(--secondary-foreground));
-  }
-  .text-secondary-foreground {
-    color: hsl(var(--secondary-foreground));
-  }
-  .bg-muted {
-    background-color: hsl(var(--muted));
-  }
-  .text-muted {
-    color: hsl(var(--muted));
-  }
-  .bg-muted-foreground {
-    background-color: hsl(var(--muted-foreground));
-  }
-  .text-muted-foreground {
-    color: hsl(var(--muted-foreground));
-  }
-  .bg-accent {
-    background-color: hsl(var(--accent));
-  }
-  .text-accent {
-    color: hsl(var(--accent));
-  }
-  .bg-accent-foreground {
-    background-color: hsl(var(--accent-foreground));
-  }
-  .text-accent-foreground {
-    color: hsl(var(--accent-foreground));
-  }
-  .bg-destructive {
-    background-color: hsl(var(--destructive));
-  }
-  .text-destructive {
-    color: hsl(var(--destructive));
-  }
-  .bg-destructive-foreground {
-    background-color: hsl(var(--destructive-foreground));
-  }
-  .text-destructive-foreground {
-    color: hsl(var(--destructive-foreground));
-  }
-  .border-input {
-    border-color: hsl(var(--input));
-  }
-  .bg-input {
-    background-color: hsl(var(--input));
-  }
-  .ring-ring {
-    --tw-ring-color: hsl(var(--ring));
-  }
-
   .text-balance {
     text-wrap: balance;
   }
   /* Animation utilities */
   .animate-fade-in {
-    animation: fadeIn 0.5s ease-in-out;
+    @apply animate-fade-in;
   }
   .animate-slide-up {
-    animation: slideUp 0.3s ease-out;
+    @apply animate-slide-up;
   }
   /* Responsive text sizes */
   .text-responsive-sm {
@@ -220,27 +119,6 @@
   }
   .text-responsive-xl {
     @apply text-xl md:text-2xl lg:text-3xl;
-  }
-}
-
-/* Animation keyframes */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideUp {
-  from {
-    transform: translateY(10px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
   }
 }
 
