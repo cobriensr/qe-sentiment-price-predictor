@@ -5,12 +5,15 @@ applications:
       phases:
         build:
           commands:
+            - nvm use 20
             - npm ci --cache .npm --prefer-offline
+            - npm install -g @aws-amplify/cli-core
             - npx ampx pipeline-deploy --branch $AWS_BRANCH --app-id $AWS_APP_ID
     frontend:
       phases:
         preBuild:
           commands:
+            - nvm use 20
             - echo "Installing dependencies..."
             - npm install
            
