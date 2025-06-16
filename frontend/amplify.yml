@@ -6,7 +6,7 @@ applications:
         preBuild:
           commands:
             - echo "Installing dependencies..."
-            - npm ci
+            - npm install
 
         build:
           commands:
