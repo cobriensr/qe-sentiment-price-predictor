@@ -1,11 +1,13 @@
 // src/components/ui/LoadingSpinner.tsx
-import React from 'react'
 import { Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import LoadingSpinnerProps from '@/types/loadingspinnerprops'
 
-
-export default function LoadingSpinner({ size = 'md', text, className }: Readonly<LoadingSpinnerProps>) {
+export default function LoadingSpinner({
+  size = 'md',
+  text,
+  className,
+}: Readonly<LoadingSpinnerProps>) {
   const sizeClasses = {
     sm: 'h-4 w-4',
     md: 'h-6 w-6',
