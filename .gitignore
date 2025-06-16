@@ -474,5 +474,8 @@ license.key
 # API documentation with sensitive endpoints
 api-docs-internal/
 
-# Typescript config
+# Config files for amplify
 !*tsconfig.json
+!*package.json
+!*tsconfig.build.json
+!*package-lock.json
