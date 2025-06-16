@@ -479,5 +479,7 @@ api-docs-internal/
 !*package.json
 !*tsconfig.build.json
 *.tsconfig.tsbuildinfo
+*.tsbuildinfo
+.next/cache/tsbuildinfo.json
 !*package-lock.json
 !*eslintrc.json
