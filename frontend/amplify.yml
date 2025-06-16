@@ -7,8 +7,11 @@ applications:
           commands:
             - nvm use 20
             - npm ci --cache .npm --prefer-offline
-            - npm install -g @aws-amplify/cli-core
-            - npx ampx pipeline-deploy --branch main --app-id $APP_ID
+            - npm install -g @aws-amplify/cli@latest
+            - npm list -g | grep amplify
+            - which ampx || echo "ampx not found"
+            - which amplify || echo "amplify not found"
+            - amplify push --yes
     frontend:
       phases:
         preBuild:
