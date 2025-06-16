@@ -1,9 +1,9 @@
-// src/app/analyze/page.tsx (Updated)
+// src/app/analyze/page.tsx
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
-import Navbar from '@/components/ui/NavBar'
+import Navbar from '@/components/ui/NavBar' // Fixed: NavBar -> Navbar
 import PageHeader from '@/components/ui/PageHeader'
 import ErrorDisplay from '@/components/ui/ErrorDisplay'
 import SentimentAnalysisForm from '@/components/sentiment/SentimentAnalysisForm'
@@ -12,7 +12,8 @@ import SentimentCharts from '@/components/sentiment/SentimentCharts'
 import SentimentAnalysisSummary from '@/components/sentiment/SentimentAnalysisSummary'
 import SentimentResult from '@/types/sentimentresult'
 
-export default function AnalyzePage() {
+// Separate component for the search params logic
+function AnalyzePageContent() {
   const searchParams = useSearchParams()
   const [symbol, setSymbol] = useState(searchParams?.get('symbol') ?? '')
   const [loading, setLoading] = useState(false)
@@ -69,36 +70,58 @@ export default function AnalyzePage() {
   }
 
   return (
+    <>
+      <PageHeader
+        title="Stock Sentiment Analysis"
+        description="Analyze earnings call sentiment to predict quarterly stock performance"
+      />
+
+      <SentimentAnalysisForm
+        symbol={symbol}
+        onSymbolChange={setSymbol}
+        onSubmit={handleAnalyze}
+        loading={loading}
+      />
+
+      {error && <ErrorDisplay error={error} className="mb-8" />}
+
+      {result && (
+        <div className="space-y-8">
+          <SentimentSummaryCards result={result} />
+          <SentimentCharts
+            historicalData={result.historicalData}
+            sentimentHistory={result.sentimentHistory}
+          />
+          <SentimentAnalysisSummary result={result} />
+        </div>
+      )}
+    </>
+  )
+}
+
+// Loading component for Suspense fallback
+function AnalyzePageLoading() {
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <div className="animate-pulse">
+        <div className="h-8 bg-gray-200 rounded mb-4"></div>
+        <div className="h-4 bg-gray-200 rounded mb-8"></div>
+        <div className="h-12 bg-gray-200 rounded"></div>
+      </div>
+    </div>
+  )
+}
+
+// Main page component with Suspense boundary
+export default function AnalyzePage() {
+  return (
     <div className="min-h-screen bg-background">
       <Navbar />
 
       <div className="container mx-auto px-4 py-8">
-        <PageHeader
-          title="Stock Sentiment Analysis"
-          description="Analyze earnings call sentiment to predict quarterly stock performance"
-        />
-
-        <SentimentAnalysisForm
-          symbol={symbol}
-          onSymbolChange={setSymbol}
-          onSubmit={handleAnalyze}
-          loading={loading}
-        />
-
-        {error && <ErrorDisplay error={error} className="mb-8" />}
-
-        {result && (
-          <div className="space-y-8">
-            <SentimentSummaryCards result={result} />
-
-            <SentimentCharts
-              historicalData={result.historicalData}
-              sentimentHistory={result.sentimentHistory}
-            />
-
-            <SentimentAnalysisSummary result={result} />
-          </div>
-        )}
+        <Suspense fallback={<AnalyzePageLoading />}>
+          <AnalyzePageContent />
+        </Suspense>
       </div>
     </div>
   )

@@ -12,9 +12,8 @@ import ModelPerformanceChart from '@/components/analytics/ModelPerformanceChart'
 import SectorDistributionChart from '@/components/analytics/SectorDistributionChart'
 import SectorAnalysisTable from '@/components/analytics/SectorAnalysisTable'
 import MarketInsights from '@/components/analytics/MarketInsights'
-
-type TimeRange = '1M' | '3M' | '6M' | '1Y'
-type Metric = 'sentiment' | 'accuracy' | 'returns'
+import { TimeRange } from '@/types/timerange'
+import { Metric } from '@/types/metric'
 
 export default function AnalyticsPage() {
   const [timeRange, setTimeRange] = useState<TimeRange>('3M')

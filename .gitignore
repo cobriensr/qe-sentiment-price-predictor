@@ -478,4 +478,5 @@ api-docs-internal/
 !*tsconfig.json
 !*package.json
 !*tsconfig.build.json
+!*tsconfig.tsbuildinfo
 !*package-lock.json
