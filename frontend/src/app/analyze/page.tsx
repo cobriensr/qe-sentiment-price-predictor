@@ -10,27 +10,8 @@ import SentimentAnalysisForm from '@/components/sentiment/SentimentAnalysisForm'
 import SentimentSummaryCards from '@/components/sentiment/SentimentSummaryCards'
 import SentimentCharts from '@/components/sentiment/SentimentCharts'
 import SentimentAnalysisSummary from '@/components/sentiment/SentimentAnalysisSummary'
+import SentimentResult from '@/types/sentimentresult'
 
-interface SentimentResult {
-  symbol: string
-  sentiment: number
-  confidence: number
-  prediction: string
-  predictionValue: number
-  earningsDate: string
-  targetDate: string
-  historicalData: Array<{
-    date: string
-    price: number
-    sentiment?: number
-  }>
-  sentimentHistory: Array<{
-    quarter: string
-    sentiment: number
-    actualReturn: number
-    predictedReturn: number
-  }>
-}
 
 export default function AnalyzePage() {
   const searchParams = useSearchParams()
