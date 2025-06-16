@@ -8,15 +8,7 @@ import PortfolioSummaryCards from '@/components/portfolio/PortfolioSummaryCards'
 import PortfolioPhaseNotice from '@/components/portfolio/PortfolioPhaseNotice'
 import PortfolioControls from '@/components/portfolio/PortfolioControls'
 import PortfolioHoldingsTable, { PortfolioHolding } from '@/components/portfolio/PortfolioHoldingsTable'
-
-interface PortfolioSummary {
-  totalValue: number
-  totalCost: number
-  totalReturn: number
-  totalReturnPercent: number
-  avgSentiment: number
-  upcomingEarnings: number
-}
+import PortfolioSummary from '@/types/portfoliosummary'
 
 export default function PortfolioPage() {
   const [searchQuery, setSearchQuery] = useState('')
