@@ -473,3 +473,6 @@ license.key
 
 # API documentation with sensitive endpoints
 api-docs-internal/
+
+# Typescript config
+!*tsconfig.json
