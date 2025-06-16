@@ -1,3 +1,4 @@
+// src/components/sentiment/SentimentBadge.tsx
 import React from 'react'
 import { cn, getSentimentLabel, getSentimentColor, getSentimentBgColor } from '@/lib/utils'
 

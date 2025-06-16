@@ -1,4 +1,4 @@
-// src/app/layout.tsx - Update your metadata
+// src/app/layout.tsx
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import '../app/globals.css'
