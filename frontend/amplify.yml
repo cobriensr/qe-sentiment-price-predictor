@@ -22,7 +22,7 @@ applications:
             - ls -la .next/
 
       artifacts:
-        baseDirectory: .next
+        baseDirectory: out
         files:
           - '**/*'
 
