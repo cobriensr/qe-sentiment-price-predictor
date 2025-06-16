@@ -6,6 +6,11 @@ import StockData from '@/types/stockdata'
 import StockPrediction from '@/types/stockprediction'
 import AnalysisResult from '@/types/analysisresult'
 import EarningsCalendar from '@/types/earningscalendar'
+import Portfolio from '@/types/portfolio'
+import User from '@/types/user'
+import CreatePortfolioRequest from '@/types/createportfoliorequest'
+import LoginCredentials from '@/types/logincredentials'
+import LoginResponse from '@/types/loginresponse'
 
 // API Client Configuration
 class ApiClient {
@@ -31,7 +36,7 @@ class ApiClient {
         return config
       },
       error => {
-        return Promise.reject(error instanceof Error ? error : new Error(error))
+        return Promise.reject(error instanceof Error ? error : new Error(String(error)))
       }
     )
 
@@ -48,7 +53,7 @@ class ApiClient {
           // Optionally redirect to login
         }
 
-        return Promise.reject(error instanceof Error ? error : new Error(error))
+        return Promise.reject(error instanceof Error ? error : new Error(String(error)))
       }
     )
   }
@@ -155,10 +160,11 @@ class ApiClient {
           sentimentHistory,
         },
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = this.extractErrorMessage(error)
       return {
         success: false,
-        error: error.response?.data?.message ?? error.message ?? 'Analysis failed',
+        error: errorMessage,
       }
     }
   }
@@ -183,7 +189,7 @@ class ApiClient {
         { symbol: 'AMZN', name: 'Amazon.com, Inc.', exchange: 'NASDAQ' },
       ].filter(
         stock =>
-          stock.symbol.toLowerCase().includes(query.toLowerCase()) ??
+          stock.symbol.toLowerCase().includes(query.toLowerCase()) ||
           stock.name.toLowerCase().includes(query.toLowerCase())
       )
 
@@ -191,10 +197,11 @@ class ApiClient {
         success: true,
         data: mockResults,
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = this.extractErrorMessage(error)
       return {
         success: false,
-        error: error.response?.data?.message ?? error.message ?? 'Search failed',
+        error: errorMessage,
       }
     }
   }
@@ -211,47 +218,44 @@ class ApiClient {
   }
 
   // Portfolio Management (Phase 3)
-  async getPortfolios(): Promise<ApiResponse<any[]>> {
+  async getPortfolios(): Promise<ApiResponse<Portfolio[]>> {
     try {
       const response = await this.client.get('/portfolios')
       return response.data
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = this.extractErrorMessage(error)
       return {
         success: false,
-        error: error.response?.data?.message ?? error.message ?? 'Failed to fetch portfolios',
+        error: errorMessage,
       }
     }
   }
 
-  async createPortfolio(portfolio: {
-    name: string
-    holdings: Array<{ symbol: string; shares: number; avgCost: number }>
-  }): Promise<ApiResponse<any>> {
+  async createPortfolio(portfolio: CreatePortfolioRequest): Promise<ApiResponse<Portfolio>> {
     try {
       const response = await this.client.post('/portfolios', portfolio)
       return response.data
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = this.extractErrorMessage(error)
       return {
         success: false,
-        error: error.response?.data?.message ?? error.message ?? 'Failed to create portfolio',
+        error: errorMessage,
       }
     }
   }
 
   // User Authentication (Phase 3)
-  async login(credentials: {
-    email: string
-    password: string
-  }): Promise<ApiResponse<{ token: string; user: any }>> {
+  async login(credentials: LoginCredentials): Promise<ApiResponse<LoginResponse>> {
     try {
       const response = await this.client.post('/auth/login', credentials)
       const { token } = response.data.data
       this.setAuthToken(token)
       return response.data
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = this.extractErrorMessage(error)
       return {
         success: false,
-        error: error.response?.data?.message ?? error.message ?? 'Login failed',
+        error: errorMessage,
       }
     }
   }
@@ -267,16 +271,46 @@ class ApiClient {
     }
   }
 
-  async getCurrentUser(): Promise<ApiResponse<any>> {
+  async getCurrentUser(): Promise<ApiResponse<User>> {
     try {
       const response = await this.client.get('/auth/me')
       return response.data
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = this.extractErrorMessage(error)
       return {
         success: false,
-        error: error.response?.data?.message ?? error.message ?? 'Failed to get user',
+        error: errorMessage,
       }
     }
+  }
+
+  // Helper method to extract error messages safely
+  private extractErrorMessage(error: unknown): string {
+    if (
+      error &&
+      typeof error === 'object' &&
+      'response' in error &&
+      error.response &&
+      typeof error.response === 'object' &&
+      'data' in error.response &&
+      error.response.data &&
+      typeof error.response.data === 'object' &&
+      'message' in error.response.data &&
+      typeof error.response.data.message === 'string'
+    ) {
+      return error.response.data.message
+    }
+
+    if (
+      error &&
+      typeof error === 'object' &&
+      'message' in error &&
+      typeof error.message === 'string'
+    ) {
+      return error.message
+    }
+
+    return 'An unexpected error occurred'
   }
 }
 

@@ -225,7 +225,7 @@ export default function CalendarPage() {
             <Filter className="h-4 w-4 text-muted-foreground" />
             <select
               value={selectedFilter}
-              onChange={e => setSelectedFilter(e.target.value as any)}
+              onChange={e => setSelectedFilter(e.target.value as 'all' | 'high' | 'medium' | 'low')}
               className="px-3 py-2 border border-input bg-background rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
             >
               <option value="all">All Priority</option>

@@ -1,7 +1,7 @@
 // src/hooks/useForm.ts
 import { useState } from 'react'
 
-export function useForm<T extends Record<string, any>>(
+export function useForm<T extends Record<string, unknown>>(
   initialValues: T,
   onSubmit: (values: T) => void | Promise<void>
 ) {
@@ -9,7 +9,7 @@ export function useForm<T extends Record<string, any>>(
   const [errors, setErrors] = useState<Partial<Record<keyof T, string>>>({})
   const [loading, setLoading] = useState(false)
 
-  const handleChange = (field: keyof T, value: any) => {
+  const handleChange = (field: keyof T, value: T[keyof T]) => {
     setValues(prev => ({ ...prev, [field]: value }))
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: undefined }))

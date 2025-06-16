@@ -1,3 +1,4 @@
+// src/lib/utils.ts
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
@@ -250,8 +251,8 @@ export function createSearchParams(params: Record<string, string | number | bool
   return searchParams.toString()
 }
 
-// Debounce utility
-export function debounce<T extends (...args: any[]) => any>(
+// Debounce utility - FIXED
+export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
@@ -263,8 +264,8 @@ export function debounce<T extends (...args: any[]) => any>(
   }
 }
 
-// Throttle utility
-export function throttle<T extends (...args: any[]) => any>(
+// Throttle utility - FIXED
+export function throttle<T extends (...args: unknown[]) => unknown>(
   func: T,
   limit: number
 ): (...args: Parameters<T>) => void {
@@ -279,13 +280,41 @@ export function throttle<T extends (...args: any[]) => any>(
   }
 }
 
-// Error handling utilities
-export function handleApiError(error: any): string {
-  if (error.response?.data?.message) {
+// Type guards for error handling
+function hasMessage(error: unknown): error is { message: string } {
+  return (
+    error !== null &&
+    typeof error === 'object' &&
+    'message' in error &&
+    typeof (error as { message: unknown }).message === 'string'
+  )
+}
+
+function hasResponseMessage(error: unknown): error is {
+  response: { data: { message: string } }
+} {
+  return (
+    error !== null &&
+    typeof error === 'object' &&
+    'response' in error &&
+    typeof (error as { response: unknown }).response === 'object' &&
+    (error as { response: object }).response !== null &&
+    'data' in (error as { response: object }).response &&
+    typeof (error as { response: { data: unknown } }).response.data === 'object' &&
+    (error as { response: { data: object } }).response.data !== null &&
+    'message' in (error as { response: { data: object } }).response.data &&
+    typeof (error as { response: { data: { message: unknown } } }).response.data.message ===
+      'string'
+  )
+}
+
+// Error handling utilities - FIXED
+export function handleApiError(error: unknown): string {
+  if (hasResponseMessage(error)) {
     return error.response.data.message
   }
 
-  if (error.message) {
+  if (hasMessage(error)) {
     return error.message
   }
 

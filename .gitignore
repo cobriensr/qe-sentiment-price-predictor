@@ -480,3 +480,4 @@ api-docs-internal/
 !*tsconfig.build.json
 !*tsconfig.tsbuildinfo
 !*package-lock.json
+!*eslintrc.json
