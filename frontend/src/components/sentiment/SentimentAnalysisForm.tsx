@@ -2,7 +2,7 @@
 'use client'
 
 import { Search, Loader2 } from 'lucide-react'
-import SentimentAnalysisFormProps from '@/types/sentimentanalysisformprops'
+import SentimentAnalysisFormProps from '../../types/sentimentanalysisformprops'
 
 export default function SentimentAnalysisForm({
   symbol,

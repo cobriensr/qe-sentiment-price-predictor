@@ -1,6 +1,6 @@
 // src/components/portfolio/PortfolioControls.tsx
 import { Search } from 'lucide-react'
-import PortfolioControlsProps from '@/types/portfoliocontrolsprops'
+import PortfolioControlsProps from '../../types/portfoliocontrolsprops'
 
 export default function PortfolioControls({
   searchQuery,

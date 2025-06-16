@@ -1,6 +1,6 @@
 // src/components/analytics/ModelPerformanceChart.tsx
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import ModelPerformanceChartProps from '@/types/modelperformancechartprops'
+import ModelPerformanceChartProps from '../../types/modelperformancechartprops'
 
 export default function ModelPerformanceChart({ data }: Readonly<ModelPerformanceChartProps>) {
   return (

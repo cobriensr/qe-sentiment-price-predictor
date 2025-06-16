@@ -1,16 +1,16 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios'
 
-import ApiResponse from '@/types/apiresponse'
-import SentimentAnalysis from '@/types/sentimentanalysis'
-import StockData from '@/types/stockdata'
-import StockPrediction from '@/types/stockprediction'
-import AnalysisResult from '@/types/analysisresult'
-import EarningsCalendar from '@/types/earningscalendar'
-import Portfolio from '@/types/portfolio'
-import User from '@/types/user'
-import CreatePortfolioRequest from '@/types/createportfoliorequest'
-import LoginCredentials from '@/types/logincredentials'
-import LoginResponse from '@/types/loginresponse'
+import ApiResponse from '../types/apiresponse'
+import SentimentAnalysis from '../types/sentimentanalysis'
+import StockData from '../types/stockdata'
+import StockPrediction from '../types/stockprediction'
+import AnalysisResult from '../types/analysisresult'
+import EarningsCalendar from '../types/earningscalendar'
+import Portfolio from '../types/portfolio'
+import User from '../types/user'
+import CreatePortfolioRequest from '../types/createportfoliorequest'
+import LoginCredentials from '../types/logincredentials'
+import LoginResponse from '../types/loginresponse'
 
 // API Client Configuration
 class ApiClient {

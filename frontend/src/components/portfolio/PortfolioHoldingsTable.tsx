@@ -1,8 +1,8 @@
 // src/components/portfolio/PortfolioHoldingsTable.tsx
 import Link from 'next/link'
 import { TrendingUp, TrendingDown, BarChart3 } from 'lucide-react'
-import SentimentBadge from '@/components/sentiment/SentimentBadge'
-import PortfolioHoldingsTableProps from '@/types/portfolioholdingstableprops'
+import SentimentBadge from '../../components/sentiment/SentimentBadge'
+import PortfolioHoldingsTableProps from '../../types/portfolioholdingstableprops'
 
 export default function PortfolioHoldingsTable({
   holdings,

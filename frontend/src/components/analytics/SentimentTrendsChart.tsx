@@ -8,7 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts'
-import SentimentTrendsChartProps from '@/types/sentimenttrendschartprops'
+import SentimentTrendsChartProps from '../../types/sentimenttrendschartprops'
 
 export default function SentimentTrendsChart({ data }: Readonly<SentimentTrendsChartProps>) {
   return (

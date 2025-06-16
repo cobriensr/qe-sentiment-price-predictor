@@ -1,7 +1,11 @@
 // src/components/ui/PageHeader.tsx
-import PageHeaderProps from '@/types/pageheaderprops'
+import PageHeaderProps from '../../types/pageheaderprops'
 
-export default function PageHeader({ title, description, className = '' }: PageHeaderProps) {
+export default function PageHeader({
+  title,
+  description,
+  className = '',
+}: Readonly<PageHeaderProps>) {
   return (
     <div className={`mb-8 ${className}`}>
       <h1 className="text-3xl font-bold mb-2">{title}</h1>

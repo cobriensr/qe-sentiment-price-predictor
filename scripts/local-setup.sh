@@ -270,7 +270,7 @@ EOF
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "../../*": ["./src/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

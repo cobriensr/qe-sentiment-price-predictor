@@ -1,5 +1,5 @@
 // src/components/sentiment/SentimentAnalysisSummary.tsx
-import SentimentAnalysisSummaryProps from '@/types/sentimentanalysissummaryprops'
+import SentimentAnalysisSummaryProps from '../../types/sentimentanalysissummaryprops'
 
 export default function SentimentAnalysisSummary({
   result,

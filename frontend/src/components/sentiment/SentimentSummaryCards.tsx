@@ -1,6 +1,6 @@
 // src/components/sentiment/SentimentSummaryCards.tsx
 import { TrendingUp, TrendingDown, Calendar, BarChart3 } from 'lucide-react'
-import SentimentSummaryCardsProps from '@/types/sentimentsummarycardsprops'
+import SentimentSummaryCardsProps from '../../types/sentimentsummarycardsprops'
 
 export default function SentimentSummaryCards({ result }: Readonly<SentimentSummaryCardsProps>) {
   const getSentimentLabel = (sentiment: number) => {

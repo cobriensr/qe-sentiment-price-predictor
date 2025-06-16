@@ -4,10 +4,10 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { Calendar, ChevronLeft, ChevronRight, Filter, TrendingUp, Search } from 'lucide-react'
-import Navbar from '@/components/ui/NavBar'
-import PageHeader from '@/components/ui/PageHeader'
-import SentimentBadge from '@/components/sentiment/SentimentBadge'
-import EarningsEvent from '@/types/earningsevent'
+import Navbar from '../../components/ui/NavBar'
+import PageHeader from '../../components/ui/PageHeader'
+import SentimentBadge from '../../components/sentiment/SentimentBadge'
+import EarningsEvent from '../../types/earningsevent'
 
 export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date(2025, 0, 16)) // January 16, 2025

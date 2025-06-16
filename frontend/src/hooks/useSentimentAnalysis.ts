@@ -1,6 +1,6 @@
 // src/hooks/useSentimentAnalysis.ts
 import { useState } from 'react'
-import { SentimentResult } from '@/types/sentimentresult'
+import { SentimentResult } from '../types/sentimentresult'
 
 export function useSentimentAnalysis() {
   const [loading, setLoading] = useState(false)

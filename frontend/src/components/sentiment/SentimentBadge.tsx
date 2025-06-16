@@ -1,6 +1,6 @@
 // src/components/sentiment/SentimentBadge.tsx
-import { cn, getSentimentLabel, getSentimentColor, getSentimentBgColor } from '@/lib/utils'
-import SentimentBadgeProps from '@/types/sentimentbadgeprops'
+import { cn, getSentimentLabel, getSentimentColor, getSentimentBgColor } from '../../lib/utils'
+import SentimentBadgeProps from '../../types/sentimentbadgeprops'
 
 export default function SentimentBadge({
   sentiment,

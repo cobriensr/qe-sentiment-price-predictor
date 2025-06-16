@@ -1,6 +1,6 @@
 // src/components/analytics/MarketInsights.tsx
 import { TrendingUp, TrendingDown, BarChart3 } from 'lucide-react'
-import MarketInsightsProps from '@/types/marketinsightprops'
+import MarketInsightsProps from '../../types/marketinsightprops'
 
 export default function MarketInsights({ insights }: Readonly<MarketInsightsProps>) {
   const getImpactColor = (impact: string) => {

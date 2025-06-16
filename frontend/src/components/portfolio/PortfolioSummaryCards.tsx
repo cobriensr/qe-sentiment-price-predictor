@@ -1,7 +1,7 @@
 // src/components/portfolio/PortfolioSummaryCards.tsx
 import { BarChart3, TrendingUp, TrendingDown, Calendar } from 'lucide-react'
-import SentimentBadge from '@/components/sentiment/SentimentBadge'
-import PortfolioSummaryCardsProps from '@/types/portfoliosummarycardsprops'
+import SentimentBadge from '../../components/sentiment/SentimentBadge'
+import PortfolioSummaryCardsProps from '../../types/portfoliosummarycardsprops'
 
 export default function PortfolioSummaryCards({ summary }: PortfolioSummaryCardsProps) {
   const formatCurrency = (value: number) => {

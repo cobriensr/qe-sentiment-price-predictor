@@ -1,6 +1,6 @@
 // src/components/analytics/AnalyticsKeyMetrics.tsx
 import { Target, BarChart3, Award, PieChart } from 'lucide-react'
-import AnalyticsKeyMetricsProps from '@/types/analyticskeymetricsprops'
+import AnalyticsKeyMetricsProps from '../../types/analyticskeymetricsprops'
 
 export default function AnalyticsKeyMetrics({ metrics }: Readonly<AnalyticsKeyMetricsProps>) {
   return (

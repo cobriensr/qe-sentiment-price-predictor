@@ -1,8 +1,8 @@
 // src/components/analytics/AnalyticsControls.tsx
 import { Filter } from 'lucide-react'
-import AnalyticsControlsProps from '@/types/analyticscontrolsprops'
-import { TimeRange } from '@/types/timerange'
-import { Metric } from '@/types/metric'
+import AnalyticsControlsProps from '../../types/analyticscontrolsprops'
+import { TimeRange } from '../../types/timerange'
+import { Metric } from '../../types/metric'
 
 export default function AnalyticsControls({
   timeRange,

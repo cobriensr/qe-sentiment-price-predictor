@@ -1,7 +1,7 @@
 // src/components/analytics/AnalyticsPageHeader.tsx
 import { RefreshCw, Download } from 'lucide-react'
-import PageHeader from '@/components/ui/PageHeader'
-import AnalyticsPageHeaderProps from '@/types/analyticspageheaderprops'
+import PageHeader from '../../components/ui/PageHeader'
+import AnalyticsPageHeaderProps from '../../types/analyticspageheaderprops'
 
 export default function AnalyticsPageHeader({
   onRefresh,

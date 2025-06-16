@@ -1,6 +1,6 @@
 // src/components/analytics/SectorAnalysisTable.tsx
-import SentimentBadge from '@/components/sentiment/SentimentBadge'
-import SectorAnalysisTableProps from '@/types/sectoranalysistableprops'
+import SentimentBadge from '../../components/sentiment/SentimentBadge'
+import SectorAnalysisTableProps from '../../types/sectoranalysistableprops'
 
 export default function SectorAnalysisTable({ sectors }: Readonly<SectorAnalysisTableProps>) {
   const getRiskBadgeColor = (risk: string) => {

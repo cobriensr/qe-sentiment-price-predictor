@@ -2,14 +2,14 @@
 'use client'
 
 import { useState } from 'react'
-import Navbar from '@/components/ui/NavBar'
-import PortfolioPageHeader from '@/components/portfolio/PortfolioPageHeader'
-import PortfolioSummaryCards from '@/components/portfolio/PortfolioSummaryCards'
-import PortfolioPhaseNotice from '@/components/portfolio/PortfolioPhaseNotice'
-import PortfolioControls from '@/components/portfolio/PortfolioControls'
-import PortfolioHoldingsTable from '@/components/portfolio/PortfolioHoldingsTable'
-import PortfolioHolding from '@/types/portfolioholding'
-import PortfolioSummary from '@/types/portfoliosummary'
+import Navbar from '../../components/ui/NavBar'
+import PortfolioPageHeader from '../../components/portfolio/PortfolioPageHeader'
+import PortfolioSummaryCards from '../../components/portfolio/PortfolioSummaryCards'
+import PortfolioPhaseNotice from '../../components/portfolio/PortfolioPhaseNotice'
+import PortfolioControls from '../../components/portfolio/PortfolioControls'
+import PortfolioHoldingsTable from '../../components/portfolio/PortfolioHoldingsTable'
+import PortfolioHolding from '../../types/portfolioholding'
+import PortfolioSummary from '../../types/portfoliosummary'
 
 export default function PortfolioPage() {
   const [searchQuery, setSearchQuery] = useState('')

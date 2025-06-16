@@ -1,7 +1,7 @@
 // src/components/portfolio/PortfolioPageHeader.tsx
 import { Plus } from 'lucide-react'
-import PageHeader from '@/components/ui/PageHeader'
-import PortfolioPageHeaderProps from '@/types/portfoliopageheaderprops'
+import PageHeader from '../../components/ui/PageHeader'
+import PortfolioPageHeaderProps from '../../types/portfoliopageheaderprops'
 
 export default function PortfolioPageHeader({
   onAddHolding,

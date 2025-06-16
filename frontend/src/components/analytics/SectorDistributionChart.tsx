@@ -1,6 +1,6 @@
 // src/components/analytics/SectorDistributionChart.tsx
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
-import SectorDistributionChartProps from '@/types/sectordistributionchartprops'
+import SectorDistributionChartProps from '../../types/sectordistributionchartprops'
 
 export default function SectorDistributionChart({ data }: Readonly<SectorDistributionChartProps>) {
   const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6']

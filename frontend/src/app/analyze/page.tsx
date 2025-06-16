@@ -3,14 +3,14 @@
 
 import { useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
-import Navbar from '@/components/ui/NavBar' // Fixed: NavBar -> Navbar
-import PageHeader from '@/components/ui/PageHeader'
-import ErrorDisplay from '@/components/ui/ErrorDisplay'
-import SentimentAnalysisForm from '@/components/sentiment/SentimentAnalysisForm'
-import SentimentSummaryCards from '@/components/sentiment/SentimentSummaryCards'
-import SentimentCharts from '@/components/sentiment/SentimentCharts'
-import SentimentAnalysisSummary from '@/components/sentiment/SentimentAnalysisSummary'
-import SentimentResult from '@/types/sentimentresult'
+import Navbar from '../../components/ui/NavBar' // Fixed: NavBar -> Navbar
+import PageHeader from '../../components/ui/PageHeader'
+import ErrorDisplay from '../../components/ui/ErrorDisplay'
+import SentimentAnalysisForm from '../../components/sentiment/SentimentAnalysisForm'
+import SentimentSummaryCards from '../../components/sentiment/SentimentSummaryCards'
+import SentimentCharts from '../../components/sentiment/SentimentCharts'
+import SentimentAnalysisSummary from '../../components/sentiment/SentimentAnalysisSummary'
+import SentimentResult from '../../types/sentimentresult'
 
 // Separate component for the search params logic
 function AnalyzePageContent() {

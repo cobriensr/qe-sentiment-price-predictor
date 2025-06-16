@@ -10,7 +10,7 @@ import {
   BarChart,
   Bar,
 } from 'recharts'
-import SentimentChartsProps from '@/types/sentimentchartsprops'
+import SentimentChartsProps from '../../types/sentimentchartsprops'
 
 export default function SentimentCharts({
   historicalData,

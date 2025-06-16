@@ -1,7 +1,7 @@
 // src/components/ui/LoadingSpinner.tsx
 import { Loader2 } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import LoadingSpinnerProps from '@/types/loadingspinnerprops'
+import { cn } from '../../lib/utils'
+import LoadingSpinnerProps from '../../types/loadingspinnerprops'
 
 export default function LoadingSpinner({
   size = 'md',
