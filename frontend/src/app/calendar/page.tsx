@@ -7,17 +7,7 @@ import { Calendar, ChevronLeft, ChevronRight, Filter, TrendingUp, Search } from 
 import Navbar from '@/components/ui/NavBar'
 import PageHeader from '@/components/ui/PageHeader'
 import SentimentBadge from '@/components/sentiment/SentimentBadge'
-
-interface EarningsEvent {
-  symbol: string
-  company: string
-  date: string
-  time: string
-  quarter: string
-  lastSentiment?: number
-  expectedSentiment?: number
-  importance: 'high' | 'medium' | 'low'
-}
+import EarningsEvent from '@/types/earningsevent'
 
 export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date(2025, 0, 16)) // January 16, 2025
