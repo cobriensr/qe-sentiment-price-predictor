@@ -6,35 +6,29 @@ applications:
         preBuild:
           commands:
             - echo "Installing dependencies..."
-            - npm install
-
+            - npm ci
         build:
           commands:
-            - echo "Building Next.js application..."
+            - echo "Building Next.js application for SSR..."
             - echo "Environment $AMPLIFY_BRANCH"
             - echo "API URL $NEXT_PUBLIC_API_URL"
             - npm run build
-
         postBuild:
           commands:
             - echo "Build completed successfully"
             - echo "Checking build output..."
             - ls -la .next/
-
       artifacts:
-        baseDirectory: out
+        baseDirectory: .next
         files:
           - '**/*'
-
       cache:
         paths:
           - node_modules/**/*
           - .next/cache/**/*
-
     environmentVariables:
       - NEXT_PUBLIC_ENVIRONMENT: $AMPLIFY_BRANCH
       - NODE_ENV: production
-
 customHeaders:
   - pattern: '**'
     headers:
@@ -46,7 +40,6 @@ customHeaders:
         value: 'strict-origin-when-cross-origin'
       - key: 'Permissions-Policy'
         value: 'camera=(), microphone=(), geolocation=()'
-
   - pattern: '/api/**'
     headers:
       - key: 'Access-Control-Allow-Origin'
