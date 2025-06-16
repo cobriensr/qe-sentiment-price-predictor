@@ -1,5 +1,5 @@
 // src/components/ui/PageHeader.tsx
-import PageHeaderProps from "@/types/pageheaderprops"
+import PageHeaderProps from '@/types/pageheaderprops'
 
 export default function PageHeader({ title, description, className = '' }: PageHeaderProps) {
   return (

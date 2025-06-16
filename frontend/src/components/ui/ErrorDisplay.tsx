@@ -2,7 +2,6 @@
 import { AlertCircle } from 'lucide-react'
 import ErrorDisplayProps from '@/types/errordisplayprops'
 
-
 export default function ErrorDisplay({ error, className = '' }: Readonly<ErrorDisplayProps>) {
   return (
     <div
