@@ -1,6 +1,12 @@
 version: 1
 applications:
   - appRoot: frontend
+    backend:
+      phases:
+        build:
+          commands:
+            - npm ci --cache .npm --prefer-offline
+            - npx ampx pipeline-deploy --branch $AWS_BRANCH --app-id $AWS_APP_ID
     frontend:
       phases:
         preBuild:
@@ -30,6 +36,7 @@ applications:
         paths:
           - node_modules/**/*
           - .next/cache/**/*
+          - .npm/**/*
          
     environmentVariables:
       - NEXT_PUBLIC_ENVIRONMENT: $AMPLIFY_BRANCH
