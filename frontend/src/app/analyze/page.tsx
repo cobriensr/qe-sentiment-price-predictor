@@ -12,7 +12,6 @@ import SentimentCharts from '@/components/sentiment/SentimentCharts'
 import SentimentAnalysisSummary from '@/components/sentiment/SentimentAnalysisSummary'
 import SentimentResult from '@/types/sentimentresult'
 
-
 export default function AnalyzePage() {
   const searchParams = useSearchParams()
   const [symbol, setSymbol] = useState(searchParams?.get('symbol') ?? '')
@@ -31,7 +30,7 @@ export default function AnalyzePage() {
     try {
       // Simulate API call - replace with actual API endpoint
       await new Promise(resolve => setTimeout(resolve, 2000))
-     
+
       // Mock data - replace with actual API response
       const mockResult: SentimentResult = {
         symbol: symbol.toUpperCase(),
@@ -53,9 +52,9 @@ export default function AnalyzePage() {
           { quarter: 'Q2 2024', sentiment: 0.7, actualReturn: 2.9, predictedReturn: 4.2 },
           { quarter: 'Q3 2024', sentiment: 0.8, actualReturn: 5.9, predictedReturn: 6.1 },
           { quarter: 'Q4 2024', sentiment: 0.75, actualReturn: 8.8, predictedReturn: 9.2 },
-        ]
+        ],
       }
-     
+
       setResult(mockResult)
     } catch (err) {
       if (err instanceof Error) {
@@ -72,7 +71,7 @@ export default function AnalyzePage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
+
       <div className="container mx-auto px-4 py-8">
         <PageHeader
           title="Stock Sentiment Analysis"
@@ -91,12 +90,12 @@ export default function AnalyzePage() {
         {result && (
           <div className="space-y-8">
             <SentimentSummaryCards result={result} />
-           
+
             <SentimentCharts
               historicalData={result.historicalData}
               sentimentHistory={result.sentimentHistory}
             />
-           
+
             <SentimentAnalysisSummary result={result} />
           </div>
         )}

@@ -24,7 +24,7 @@ export default function CalendarPage() {
       quarter: 'Q4 2024',
       lastSentiment: 0.72,
       expectedSentiment: 0.68,
-      importance: 'high'
+      importance: 'high',
     },
     {
       symbol: 'TSLA',
@@ -34,7 +34,7 @@ export default function CalendarPage() {
       quarter: 'Q4 2024',
       lastSentiment: 0.65,
       expectedSentiment: 0.71,
-      importance: 'high'
+      importance: 'high',
     },
     {
       symbol: 'AAPL',
@@ -44,7 +44,7 @@ export default function CalendarPage() {
       quarter: 'Q1 2025',
       lastSentiment: 0.78,
       expectedSentiment: 0.75,
-      importance: 'high'
+      importance: 'high',
     },
     {
       symbol: 'MSFT',
@@ -54,7 +54,7 @@ export default function CalendarPage() {
       quarter: 'Q2 2025',
       lastSentiment: 0.82,
       expectedSentiment: 0.79,
-      importance: 'high'
+      importance: 'high',
     },
     {
       symbol: 'GOOGL',
@@ -64,7 +64,7 @@ export default function CalendarPage() {
       quarter: 'Q4 2024',
       lastSentiment: 0.58,
       expectedSentiment: 0.62,
-      importance: 'high'
+      importance: 'high',
     },
     {
       symbol: 'META',
@@ -74,7 +74,7 @@ export default function CalendarPage() {
       quarter: 'Q4 2024',
       lastSentiment: 0.45,
       expectedSentiment: 0.52,
-      importance: 'medium'
+      importance: 'medium',
     },
     {
       symbol: 'AMZN',
@@ -84,7 +84,7 @@ export default function CalendarPage() {
       quarter: 'Q4 2024',
       lastSentiment: 0.71,
       expectedSentiment: 0.69,
-      importance: 'high'
+      importance: 'high',
     },
     {
       symbol: 'NVDA',
@@ -94,8 +94,8 @@ export default function CalendarPage() {
       quarter: 'Q4 2025',
       lastSentiment: 0.88,
       expectedSentiment: 0.85,
-      importance: 'high'
-    }
+      importance: 'high',
+    },
   ]
 
   const getMonthName = (date: Date) => {
@@ -122,9 +122,10 @@ export default function CalendarPage() {
     }
 
     if (searchQuery) {
-      filtered = filtered.filter(event => 
-        event.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        event.company.toLowerCase().includes(searchQuery.toLowerCase())
+      filtered = filtered.filter(
+        event =>
+          event.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          event.company.toLowerCase().includes(searchQuery.toLowerCase())
       )
     }
 
@@ -132,14 +133,17 @@ export default function CalendarPage() {
   }
 
   const groupEventsByDate = (events: EarningsEvent[]) => {
-    return events.reduce((groups, event) => {
-      const date = event.date
-      if (!groups[date]) {
-        groups[date] = []
-      }
-      groups[date].push(event)
-      return groups
-    }, {} as Record<string, EarningsEvent[]>)
+    return events.reduce(
+      (groups, event) => {
+        const date = event.date
+        if (!groups[date]) {
+          groups[date] = []
+        }
+        groups[date].push(event)
+        return groups
+      },
+      {} as Record<string, EarningsEvent[]>
+    )
   }
 
   const filteredEvents = filterEvents(earningsEvents)
@@ -147,10 +151,10 @@ export default function CalendarPage() {
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr)
-    return date.toLocaleDateString('en-US', { 
-      weekday: 'long', 
-      month: 'long', 
-      day: 'numeric' 
+    return date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
     })
   }
 
@@ -162,10 +166,14 @@ export default function CalendarPage() {
 
   const getImportanceColor = (importance: string) => {
     switch (importance) {
-      case 'high': return 'bg-red-500'
-      case 'medium': return 'bg-yellow-500'
-      case 'low': return 'bg-green-500'
-      default: return 'bg-gray-500'
+      case 'high':
+        return 'bg-red-500'
+      case 'medium':
+        return 'bg-yellow-500'
+      case 'low':
+        return 'bg-green-500'
+      default:
+        return 'bg-gray-500'
     }
   }
 
@@ -207,7 +215,7 @@ export default function CalendarPage() {
               type="text"
               placeholder="Search companies or symbols..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={e => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-input bg-background rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
@@ -217,7 +225,7 @@ export default function CalendarPage() {
             <Filter className="h-4 w-4 text-muted-foreground" />
             <select
               value={selectedFilter}
-              onChange={(e) => setSelectedFilter(e.target.value as any)}
+              onChange={e => setSelectedFilter(e.target.value as any)}
               className="px-3 py-2 border border-input bg-background rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
             >
               <option value="all">All Priority</option>
@@ -261,16 +269,18 @@ export default function CalendarPage() {
                     </span>
                   )}
                 </div>
-                
+
                 <div className="grid gap-3">
-                  {events.map((event) => (
+                  {events.map(event => (
                     <div
                       key={`${event.symbol}-${event.date}`}
                       className="p-4 bg-card rounded-lg border hover:shadow-md transition-shadow"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                          <div className={`w-2 h-2 rounded-full ${getImportanceColor(event.importance)}`}></div>
+                          <div
+                            className={`w-2 h-2 rounded-full ${getImportanceColor(event.importance)}`}
+                          ></div>
                           <div>
                             <div className="flex items-center gap-3">
                               <span className="font-bold text-lg">{event.symbol}</span>
@@ -283,22 +293,24 @@ export default function CalendarPage() {
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center gap-4">
                           {event.lastSentiment && (
                             <div className="text-center">
-                              <div className="text-xs text-muted-foreground mb-1">Last Sentiment</div>
+                              <div className="text-xs text-muted-foreground mb-1">
+                                Last Sentiment
+                              </div>
                               <SentimentBadge sentiment={event.lastSentiment} size="sm" />
                             </div>
                           )}
-                          
+
                           {event.expectedSentiment && (
                             <div className="text-center">
                               <div className="text-xs text-muted-foreground mb-1">Expected</div>
                               <SentimentBadge sentiment={event.expectedSentiment} size="sm" />
                             </div>
                           )}
-                          
+
                           <Link
                             href={`/analyze?symbol=${event.symbol}`}
                             className="px-3 py-1.5 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors text-sm flex items-center gap-1"
@@ -320,8 +332,8 @@ export default function CalendarPage() {
             <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">No earnings found</h3>
             <p className="text-muted-foreground">
-              {searchQuery || selectedFilter !== 'all' 
-                ? 'Try adjusting your search or filter criteria.' 
+              {searchQuery || selectedFilter !== 'all'
+                ? 'Try adjusting your search or filter criteria.'
                 : 'No earnings calls scheduled for this period.'}
             </p>
           </div>

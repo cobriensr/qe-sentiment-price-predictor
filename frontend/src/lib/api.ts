@@ -1,5 +1,12 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios'
-import { ApiResponse, SentimentAnalysis, StockData, StockPrediction, AnalysisResult, EarningsCalendar } from '@/types'
+import {
+  ApiResponse,
+  SentimentAnalysis,
+  StockData,
+  StockPrediction,
+  AnalysisResult,
+  EarningsCalendar,
+} from '@/types'
 
 // API Client Configuration
 class ApiClient {
@@ -16,7 +23,7 @@ class ApiClient {
 
     // Request interceptor
     this.client.interceptors.request.use(
-      (config) => {
+      config => {
         // Add authentication token if available
         const token = this.getAuthToken()
         if (token) {
@@ -24,7 +31,7 @@ class ApiClient {
         }
         return config
       },
-      (error) => {
+      error => {
         return Promise.reject(error instanceof Error ? error : new Error(error))
       }
     )
@@ -34,14 +41,14 @@ class ApiClient {
       (response: AxiosResponse) => {
         return response
       },
-      (error) => {
+      error => {
         // Handle common errors
         if (error.response?.status === 401) {
           // Unauthorized - clear auth token
           this.clearAuthToken()
           // Optionally redirect to login
         }
-        
+
         return Promise.reject(error instanceof Error ? error : new Error(error))
       }
     )
@@ -100,26 +107,26 @@ class ApiClient {
       // Later this can be optimized to a single endpoint
       const [sentimentRes, stockRes] = await Promise.all([
         this.analyzeSentiment({ symbol }),
-        this.getStockData(symbol)
+        this.getStockData(symbol),
       ])
 
       if (!sentimentRes.success || !stockRes.success) {
         return {
           success: false,
-          error: sentimentRes.error ?? stockRes.error ?? 'Analysis failed'
+          error: sentimentRes.error ?? stockRes.error ?? 'Analysis failed',
         }
       }
 
       // Get prediction based on sentiment
       const predictionRes = await this.getPrediction({
         symbol,
-        sentiment: sentimentRes.data!.sentiment
+        sentiment: sentimentRes.data!.sentiment,
       })
 
       if (!predictionRes.success) {
         return {
           success: false,
-          error: predictionRes.error ?? 'Prediction failed'
+          error: predictionRes.error ?? 'Prediction failed',
         }
       }
 
@@ -146,23 +153,27 @@ class ApiClient {
           stock: stockRes.data!,
           prediction: predictionRes.data!,
           historicalData,
-          sentimentHistory
-        }
+          sentimentHistory,
+        },
       }
     } catch (error: any) {
       return {
         success: false,
-        error: error.response?.data?.message ?? error.message ?? 'Analysis failed'
+        error: error.response?.data?.message ?? error.message ?? 'Analysis failed',
       }
     }
   }
 
   // Search stocks
-  async searchStocks(query: string): Promise<ApiResponse<Array<{
-    symbol: string
-    name: string
-    exchange: string
-  }>>> {
+  async searchStocks(query: string): Promise<
+    ApiResponse<
+      Array<{
+        symbol: string
+        name: string
+        exchange: string
+      }>
+    >
+  > {
     try {
       // For now, return mock data - replace with actual search endpoint
       const mockResults = [
@@ -171,19 +182,20 @@ class ApiClient {
         { symbol: 'GOOGL', name: 'Alphabet Inc.', exchange: 'NASDAQ' },
         { symbol: 'TSLA', name: 'Tesla, Inc.', exchange: 'NASDAQ' },
         { symbol: 'AMZN', name: 'Amazon.com, Inc.', exchange: 'NASDAQ' },
-      ].filter(stock => 
-        stock.symbol.toLowerCase().includes(query.toLowerCase()) ??
-        stock.name.toLowerCase().includes(query.toLowerCase())
+      ].filter(
+        stock =>
+          stock.symbol.toLowerCase().includes(query.toLowerCase()) ??
+          stock.name.toLowerCase().includes(query.toLowerCase())
       )
 
       return {
         success: true,
-        data: mockResults
+        data: mockResults,
       }
     } catch (error: any) {
       return {
         success: false,
-        error: error.response?.data?.message ?? error.message ?? 'Search failed'
+        error: error.response?.data?.message ?? error.message ?? 'Search failed',
       }
     }
   }
@@ -194,7 +206,7 @@ class ApiClient {
     endDate: string
   ): Promise<ApiResponse<EarningsCalendar[]>> {
     const response = await this.client.get('/calendar', {
-      params: { start_date: startDate, end_date: endDate }
+      params: { start_date: startDate, end_date: endDate },
     })
     return response.data
   }
@@ -207,7 +219,7 @@ class ApiClient {
     } catch (error: any) {
       return {
         success: false,
-        error: error.response?.data?.message ?? error.message ?? 'Failed to fetch portfolios'
+        error: error.response?.data?.message ?? error.message ?? 'Failed to fetch portfolios',
       }
     }
   }
@@ -222,7 +234,7 @@ class ApiClient {
     } catch (error: any) {
       return {
         success: false,
-        error: error.response?.data?.message ?? error.message ?? 'Failed to create portfolio'
+        error: error.response?.data?.message ?? error.message ?? 'Failed to create portfolio',
       }
     }
   }
@@ -240,7 +252,7 @@ class ApiClient {
     } catch (error: any) {
       return {
         success: false,
-        error: error.response?.data?.message ?? error.message ?? 'Login failed'
+        error: error.response?.data?.message ?? error.message ?? 'Login failed',
       }
     }
   }
@@ -252,7 +264,7 @@ class ApiClient {
       await this.client.post('/auth/logout')
     } catch (error) {
       // Log logout errors for debugging
-      console.error('Logout error:', error);
+      console.error('Logout error:', error)
     }
   }
 
@@ -263,7 +275,7 @@ class ApiClient {
     } catch (error: any) {
       return {
         success: false,
-        error: error.response?.data?.message ?? error.message ?? 'Failed to get user'
+        error: error.response?.data?.message ?? error.message ?? 'Failed to get user',
       }
     }
   }
@@ -286,5 +298,5 @@ export const {
   createPortfolio,
   login,
   logout,
-  getCurrentUser
+  getCurrentUser,
 } = apiClient

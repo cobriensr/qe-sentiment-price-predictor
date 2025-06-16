@@ -28,23 +28,35 @@ export default function HomePage() {
             <div className="flex items-center space-x-8">
               <h1 className="text-xl font-bold text-primary">Earnings Sentiment Analyzer</h1>
               <div className="hidden md:flex space-x-6">
-                <Link href="/analyze" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link
+                  href="/analyze"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
                   Analyze
                 </Link>
-                <Link href="/calendar" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link
+                  href="/calendar"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
                   Calendar
                 </Link>
-                <Link href="/portfolio" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link
+                  href="/portfolio"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
                   Portfolio
                 </Link>
-                <Link href="/analytics" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link
+                  href="/analytics"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
                   Analytics
                 </Link>
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <Link 
-                href="/analyze" 
+              <Link
+                href="/analyze"
                 className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
               >
                 Start Analyzing
@@ -62,10 +74,10 @@ export default function HomePage() {
               Predict Stock Movements with Earnings Sentiment
             </h1>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Analyze quarterly earnings calls with machine learning to predict long-term stock performance. 
-              Get insights beyond the immediate market reaction.
+              Analyze quarterly earnings calls with machine learning to predict long-term stock
+              performance. Get insights beyond the immediate market reaction.
             </p>
-            
+
             {/* Search Bar */}
             <div className="max-w-md mx-auto mb-12">
               <div className="relative">
@@ -74,9 +86,9 @@ export default function HomePage() {
                   type="text"
                   placeholder="Enter stock symbol (e.g., AAPL)"
                   value={searchSymbol}
-                  onChange={(e) => setSearchSymbol(e.target.value)}
+                  onChange={e => setSearchSymbol(e.target.value)}
                   className="w-full pl-12 pr-4 py-4 text-lg border border-input bg-background rounded-xl focus:outline-none focus:ring-2 focus:ring-ring shadow-lg"
-                  onKeyDown={(e) => {
+                  onKeyDown={e => {
                     if (e.key === 'Enter' && searchSymbol.trim()) {
                       handleQuickAnalyze(searchSymbol.trim())
                     }
@@ -95,7 +107,7 @@ export default function HomePage() {
             {/* Quick Try Examples */}
             <div className="flex flex-wrap justify-center gap-3 mb-12">
               <span className="text-sm text-muted-foreground">Try:</span>
-              {['AAPL', 'MSFT', 'GOOGL', 'TSLA', 'AMZN'].map((symbol) => (
+              {['AAPL', 'MSFT', 'GOOGL', 'TSLA', 'AMZN'].map(symbol => (
                 <button
                   key={symbol}
                   onClick={() => handleQuickAnalyze(symbol)}
@@ -139,9 +151,10 @@ export default function HomePage() {
           <h2 className="text-3xl font-bold text-center mb-16">How It Works</h2>
           <div className="max-w-4xl mx-auto">
             <p className="text-lg text-muted-foreground text-center mb-12">
-              Our machine learning platform analyzes earnings call sentiment to predict quarterly stock performance.
+              Our machine learning platform analyzes earnings call sentiment to predict quarterly
+              stock performance.
             </p>
-            
+
             <div className="grid md:grid-cols-3 gap-8">
               <div className="text-center p-6 rounded-xl bg-card border">
                 <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
@@ -149,27 +162,30 @@ export default function HomePage() {
                 </div>
                 <h3 className="text-xl font-semibold mb-3">Sentiment Analysis</h3>
                 <p className="text-muted-foreground">
-                  Analyze earnings call transcripts to gauge management sentiment and predict stock movements.
+                  Analyze earnings call transcripts to gauge management sentiment and predict stock
+                  movements.
                 </p>
               </div>
-              
+
               <div className="text-center p-6 rounded-xl bg-card border">
                 <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <BarChart3 className="h-6 w-6 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold mb-3">Price Prediction</h3>
                 <p className="text-muted-foreground">
-                  Machine learning models predict stock performance over quarterly periods based on sentiment.
+                  Machine learning models predict stock performance over quarterly periods based on
+                  sentiment.
                 </p>
               </div>
-              
+
               <div className="text-center p-6 rounded-xl bg-card border">
                 <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Calendar className="h-6 w-6 text-primary" />
                 </div>
                 <h3 className="text-xl font-semibold mb-3">Earnings Calendar</h3>
                 <p className="text-muted-foreground">
-                  Track upcoming earnings with sentiment-based insights and historical performance data.
+                  Track upcoming earnings with sentiment-based insights and historical performance
+                  data.
                 </p>
               </div>
             </div>
@@ -182,38 +198,50 @@ export default function HomePage() {
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center mb-12">
             <h2 className="text-3xl font-bold">Recent Analyses</h2>
-            <Link 
-              href="/analyze" 
+            <Link
+              href="/analyze"
               className="text-primary hover:text-primary/80 flex items-center gap-2 font-medium"
             >
               View All <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-          
+
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {recentAnalyses.map((analysis) => (
-              <div key={analysis.symbol} className="p-6 bg-card rounded-xl border hover:shadow-lg transition-shadow">
+            {recentAnalyses.map(analysis => (
+              <div
+                key={analysis.symbol}
+                className="p-6 bg-card rounded-xl border hover:shadow-lg transition-shadow"
+              >
                 <div className="flex justify-between items-start mb-4">
                   <h3 className="text-xl font-bold">{analysis.symbol}</h3>
                   <div className="text-xs text-muted-foreground">{analysis.date}</div>
                 </div>
-                
+
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Sentiment</span>
-                    <span className={`text-sm font-medium ${
-                      analysis.sentiment >= 70 ? 'text-sentiment-positive' :
-                      analysis.sentiment >= 40 ? 'text-sentiment-neutral' : 'text-sentiment-negative'
-                    }`}>
+                    <span
+                      className={`text-sm font-medium ${
+                        analysis.sentiment >= 70
+                          ? 'text-sentiment-positive'
+                          : analysis.sentiment >= 40
+                            ? 'text-sentiment-neutral'
+                            : 'text-sentiment-negative'
+                      }`}
+                    >
                       {analysis.sentiment}%
                     </span>
                   </div>
-                  
+
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">90-day prediction</span>
-                    <span className={`text-sm font-medium ${
-                      analysis.prediction.startsWith('+') ? 'text-sentiment-positive' : 'text-sentiment-negative'
-                    }`}>
+                    <span
+                      className={`text-sm font-medium ${
+                        analysis.prediction.startsWith('+')
+                          ? 'text-sentiment-positive'
+                          : 'text-sentiment-negative'
+                      }`}
+                    >
                       {analysis.prediction}
                     </span>
                   </div>
@@ -229,16 +257,17 @@ export default function HomePage() {
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-6">Ready to Get Started?</h2>
           <p className="text-xl mb-8 text-primary-foreground/90">
-            Join thousands of investors using sentiment analysis to make better investment decisions.
+            Join thousands of investors using sentiment analysis to make better investment
+            decisions.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link 
+            <Link
               href="/analyze"
               className="px-8 py-4 bg-background text-foreground rounded-xl hover:bg-background/90 transition-colors font-semibold"
             >
               Start Analyzing
             </Link>
-            <Link 
+            <Link
               href="/calendar"
               className="px-8 py-4 border border-primary-foreground/20 text-primary-foreground rounded-xl hover:bg-primary-foreground/10 transition-colors font-semibold"
             >
@@ -253,9 +282,19 @@ export default function HomePage() {
         <div className="container mx-auto px-4">
           <div className="text-center text-muted-foreground">
             <p className="mb-4">
-              Built with <Link href="https://nextjs.org" className="text-primary hover:underline">Next.js</Link> and{' '}
-              <Link href="https://aws.amazon.com" className="text-primary hover:underline">AWS</Link>. 
-              Data powered by <Link href="#" className="text-primary hover:underline">Alpha Vantage</Link>.
+              Built with{' '}
+              <Link href="https://nextjs.org" className="text-primary hover:underline">
+                Next.js
+              </Link>{' '}
+              and{' '}
+              <Link href="https://aws.amazon.com" className="text-primary hover:underline">
+                AWS
+              </Link>
+              . Data powered by{' '}
+              <Link href="#" className="text-primary hover:underline">
+                Alpha Vantage
+              </Link>
+              .
             </p>
           </div>
         </div>

@@ -56,20 +56,20 @@
   body {
     @apply bg-background text-foreground;
   }
-  
+
   /* Custom scrollbar for better UX */
   ::-webkit-scrollbar {
     width: 6px;
   }
-  
+
   ::-webkit-scrollbar-track {
     @apply bg-secondary;
   }
-  
+
   ::-webkit-scrollbar-thumb {
     @apply bg-muted-foreground rounded-full;
   }
-  
+
   ::-webkit-scrollbar-thumb:hover {
     @apply bg-foreground/50;
   }
@@ -80,28 +80,28 @@
   .card-hover {
     @apply transition-all duration-200 hover:shadow-lg hover:-translate-y-1;
   }
-  
+
   .gradient-bg {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   }
-  
+
   .sentiment-positive {
     @apply text-sentiment-positive bg-sentiment-positive/10 border-sentiment-positive/20;
   }
-  
+
   .sentiment-negative {
     @apply text-sentiment-negative bg-sentiment-negative/10 border-sentiment-negative/20;
   }
-  
+
   .sentiment-neutral {
     @apply text-sentiment-neutral bg-sentiment-neutral/10 border-sentiment-neutral/20;
   }
-  
+
   /* Loading spinner */
   .spinner {
     @apply animate-spin rounded-full border-2 border-muted border-t-primary;
   }
-  
+
   /* Focus styles for accessibility */
   .focus-ring {
     @apply focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2;
@@ -112,29 +112,29 @@
   .text-balance {
     text-wrap: balance;
   }
-  
+
   /* Animation utilities */
   .animate-fade-in {
     animation: fadeIn 0.5s ease-in-out;
   }
-  
+
   .animate-slide-up {
     animation: slideUp 0.3s ease-out;
   }
-  
+
   /* Responsive text sizes */
   .text-responsive-sm {
     @apply text-sm md:text-base;
   }
-  
+
   .text-responsive-base {
     @apply text-base md:text-lg;
   }
-  
+
   .text-responsive-lg {
     @apply text-lg md:text-xl lg:text-2xl;
   }
-  
+
   .text-responsive-xl {
     @apply text-xl md:text-2xl lg:text-3xl;
   }
@@ -145,7 +145,7 @@
   .no-print {
     display: none !important;
   }
-  
+
   .print-break {
     page-break-before: always;
   }

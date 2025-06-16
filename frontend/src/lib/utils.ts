@@ -1,5 +1,5 @@
-import { type ClassValue, clsx } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { type ClassValue, clsx } from 'clsx'
+import { twMerge } from 'tailwind-merge'
 
 // Utility function for combining Tailwind classes
 export function cn(...inputs: ClassValue[]) {
@@ -84,11 +84,14 @@ export function formatCompactNumber(value: number): string {
 }
 
 // Date formatting utilities
-export function formatDate(date: string | Date, format: 'short' | 'medium' | 'long' = 'medium'): string {
+export function formatDate(
+  date: string | Date,
+  format: 'short' | 'medium' | 'long' = 'medium'
+): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date
-  
+
   let options: Intl.DateTimeFormatOptions
-  
+
   switch (format) {
     case 'short':
       options = { month: 'short', day: 'numeric' }
@@ -100,7 +103,7 @@ export function formatDate(date: string | Date, format: 'short' | 'medium' | 'lo
       options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }
       break
   }
-  
+
   return new Intl.DateTimeFormat('en-US', options).format(dateObj)
 }
 
@@ -119,16 +122,16 @@ export function getRelativeTime(date: string | Date): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date
   const now = new Date()
   const diffInMs = now.getTime() - dateObj.getTime()
-  
+
   const diffInMinutes = Math.floor(diffInMs / (1000 * 60))
   const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60))
   const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
-  
+
   if (diffInMinutes < 1) return 'just now'
   if (diffInMinutes < 60) return `${diffInMinutes}m ago`
   if (diffInHours < 24) return `${diffInHours}h ago`
   if (diffInDays < 7) return `${diffInDays}d ago`
-  
+
   return formatDate(dateObj, 'short')
 }
 
@@ -138,14 +141,14 @@ export function isMarketOpen(): boolean {
   const hour = now.getHours()
   const minute = now.getMinutes()
   const time = hour * 60 + minute // minutes since midnight
-  
+
   // Market is closed on weekends
   if (day === 0 || day === 6) return false
-  
+
   // Market hours: 9:30 AM - 4:00 PM ET
   const marketOpen = 9 * 60 + 30 // 9:30 AM
   const marketClose = 16 * 60 // 4:00 PM
-  
+
   return time >= marketOpen && time < marketClose
 }
 
@@ -161,19 +164,22 @@ export function isValidEmail(email: string): boolean {
 
 // Array utilities
 export function groupBy<T>(array: T[], key: keyof T): Record<string, T[]> {
-  return array.reduce((groups, item) => {
-    const group = String(item[key])
-    groups[group] = groups[group] || []
-    groups[group].push(item)
-    return groups
-  }, {} as Record<string, T[]>)
+  return array.reduce(
+    (groups, item) => {
+      const group = String(item[key])
+      groups[group] = groups[group] || []
+      groups[group].push(item)
+      return groups
+    },
+    {} as Record<string, T[]>
+  )
 }
 
 export function sortBy<T>(array: T[], key: keyof T, direction: 'asc' | 'desc' = 'asc'): T[] {
   return [...array].sort((a, b) => {
     const aVal = a[key]
     const bVal = b[key]
-    
+
     if (aVal < bVal) return direction === 'asc' ? -1 : 1
     if (aVal > bVal) return direction === 'asc' ? 1 : -1
     return 0
@@ -187,7 +193,7 @@ export function calculatePercentChange(oldValue: number, newValue: number): numb
 
 export function calculateSMA(data: number[], period: number): number[] {
   const result: number[] = []
-  
+
   for (let i = 0; i < data.length; i++) {
     if (i < period - 1) {
       result.push(NaN)
@@ -196,14 +202,14 @@ export function calculateSMA(data: number[], period: number): number[] {
       result.push(sum / period)
     }
   }
-  
+
   return result
 }
 
 // Local storage utilities with error handling
 export function getFromLocalStorage<T>(key: string, defaultValue: T): T {
   if (typeof window === 'undefined') return defaultValue
-  
+
   try {
     const item = window.localStorage.getItem(key)
     return item ? JSON.parse(item) : defaultValue
@@ -215,7 +221,7 @@ export function getFromLocalStorage<T>(key: string, defaultValue: T): T {
 
 export function setToLocalStorage<T>(key: string, value: T): void {
   if (typeof window === 'undefined') return
-  
+
   try {
     window.localStorage.setItem(key, JSON.stringify(value))
   } catch (error) {
@@ -225,7 +231,7 @@ export function setToLocalStorage<T>(key: string, value: T): void {
 
 export function removeFromLocalStorage(key: string): void {
   if (typeof window === 'undefined') return
-  
+
   try {
     window.localStorage.removeItem(key)
   } catch (error) {
@@ -236,11 +242,11 @@ export function removeFromLocalStorage(key: string): void {
 // URL utilities
 export function createSearchParams(params: Record<string, string | number | boolean>): string {
   const searchParams = new URLSearchParams()
-  
+
   Object.entries(params).forEach(([key, value]) => {
     searchParams.append(key, String(value))
   })
-  
+
   return searchParams.toString()
 }
 
@@ -250,7 +256,7 @@ export function debounce<T extends (...args: any[]) => any>(
   wait: number
 ): (...args: Parameters<T>) => void {
   let timeout: NodeJS.Timeout | null = null
-  
+
   return (...args: Parameters<T>) => {
     if (timeout) clearTimeout(timeout)
     timeout = setTimeout(() => func(...args), wait)
@@ -263,7 +269,7 @@ export function throttle<T extends (...args: any[]) => any>(
   limit: number
 ): (...args: Parameters<T>) => void {
   let inThrottle: boolean = false
-  
+
   return (...args: Parameters<T>) => {
     if (!inThrottle) {
       func(...args)
@@ -278,11 +284,11 @@ export function handleApiError(error: any): string {
   if (error.response?.data?.message) {
     return error.response.data.message
   }
-  
+
   if (error.message) {
     return error.message
   }
-  
+
   return 'An unexpected error occurred. Please try again.'
 }
 
@@ -306,7 +312,7 @@ export async function retry<T>(
     return await fn()
   } catch (error) {
     if (attempts <= 1) throw error
-    
+
     await sleep(delay)
     return retry(fn, attempts - 1, delay * 2)
   }
