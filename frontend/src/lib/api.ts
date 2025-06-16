@@ -1,12 +1,11 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios'
-import {
-  ApiResponse,
-  SentimentAnalysis,
-  StockData,
-  StockPrediction,
-  AnalysisResult,
-  EarningsCalendar,
-} from '@/types'
+
+import ApiResponse from '@/types/apiresponse'
+import SentimentAnalysis from '@/types/sentimentanalysis'
+import StockData from '@/types/stockdata'
+import StockPrediction from '@/types/stockprediction'
+import AnalysisResult from '@/types/analysisresult'
+import EarningsCalendar from '@/types/earningscalendar'
 
 // API Client Configuration
 class ApiClient {

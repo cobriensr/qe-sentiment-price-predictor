@@ -3,6 +3,7 @@ interface SentimentHistory {
   sentiment: number
   actualReturn: number
   predictedReturn: number
+  accuracy?: number
 }
 
 export default SentimentHistory
