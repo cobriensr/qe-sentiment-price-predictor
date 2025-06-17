@@ -6,14 +6,16 @@ applications:
         build:
           commands:
             - nvm use 20
+            - echo "Installing dependencies..."
             - npm ci --cache .npm --prefer-offline
+            - echo "Deploying Amplify backend..."
             - npx @aws-amplify/backend-cli@latest pipeline-deploy --branch $AMPLIFY_BRANCH --app-id $APP_ID
     frontend:
       phases:
         preBuild:
           commands:
             - nvm use 20
-            - echo "Installing dependencies..."
+            - echo "Installing frontend dependencies..."
             - npm install
            
         build:
