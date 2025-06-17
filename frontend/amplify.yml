@@ -8,6 +8,10 @@ applications:
             - nvm use 20
             - echo "Installing frontend dependencies..."
             - npm install
+            - echo "Explicitly installing TypeScript dependencies..."
+            - npm install --save-dev typescript @types/node
+            - echo "Verifying TypeScript installation..."
+            - npx tsc --version
            
         build:
           commands:
