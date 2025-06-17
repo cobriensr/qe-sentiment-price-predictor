@@ -1,0 +1,78 @@
+name: Deploy to AWS ECS
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "frontend/**" # Only trigger on frontend changes
+  workflow_dispatch: # Allow manual triggering
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: nextjs-app
+  ECS_SERVICE: nextjs-app-service
+  ECS_CLUSTER: nextjs-app-cluster
+  ECS_TASK_DEFINITION: nextjs-app-task
+  # Update with your actual ECR repository URL from terraform output
+  ECR_REGISTRY: ${{ secrets.ECR_REPOSITORY_URL }} # e.g., 123456789012.dkr.ecr.us-east-1.amazonaws.com/nextjs-app
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          # Build a docker container and push it to ECR
+          cd frontend
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Download task definition
+        run: |
+          aws ecs describe-task-definition --task-definition $ECS_TASK_DEFINITION \
+            --query taskDefinition > task-definition.json
+
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ env.ECR_REPOSITORY }}
+          image: ${{ steps.build-image.outputs.image }}
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+
+      - name: Summary
+        run: |
+          echo "🚀 Deployment completed successfully!"
+          echo "📦 Image: ${{ steps.build-image.outputs.image }}"
+          echo "🔗 ECS Service: ${{ env.ECS_SERVICE }}"
+          echo "🌐 Load Balancer: http://nextjs-app-alb-1686302174.us-east-1.elb.amazonaws.com"
