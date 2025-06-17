@@ -7,35 +7,18 @@ applications:
           commands:
             - nvm use 20
             - echo "Installing frontend dependencies..."
-            - echo "Clearing npm cache for AL2023 compatibility..."
-            - npm cache clean --force
-            - rm -rf node_modules package-lock.json
-            - echo "Installing with npm ci for clean install..."
             - npm install
-            - echo "Installing TypeScript globally for AL2023..."
-            - npm install -g typescript@latest @types/node@latest
-            - echo "Installing ALL TypeScript dependencies locally..."
-            - npm install typescript@latest @types/node@latest @types/react@latest @types/react-dom@latest --save-dev --legacy-peer-deps
-            - echo "Creating symlink to ensure Next.js finds TypeScript..."
-            - mkdir -p node_modules/.bin
-            - ln -sf /root/.nvm/versions/node/v20.19.0/bin/tsc node_modules/.bin/tsc
-            - echo "Verifying TypeScript installation..."
-            - which tsc || echo "tsc not found globally"
-            - npx tsc --version || echo "tsc not available via npx"
-            - ls -la node_modules/.bin/tsc || echo "tsc symlink not found"
+            - echo "Removing TypeScript configuration to build as JavaScript..."
+            - rm -f tsconfig.json
+            - rm -f next-env.d.ts
+            - echo "Converting to JavaScript-only build"
            
         build:
           commands:
             - echo "Building Next.js application..."
             - echo "Environment $AMPLIFY_BRANCH"
             - echo "API URL $NEXT_PUBLIC_API_URL"
-            - echo "Debugging TypeScript installation..."
-            - ls -la node_modules/.bin | grep tsc || echo "tsc not found in node_modules/.bin"
-            - npm list typescript || echo "typescript not in npm list"
-            - ls -la node_modules/typescript || echo "typescript folder not found"
-            - echo "Checking Next.js config..."
-            - cat next.config.js
-            - echo "Building with TypeScript errors ignored..."
+            - echo "Building JavaScript-only application..."
             - npm run build
            
         postBuild:
