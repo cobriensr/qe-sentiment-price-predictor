@@ -15,6 +15,10 @@ terraform {
       source  = "hashicorp/archive"
       version = "~> 2.4"
     }
+    docker = {
+      source  = "kreuzwerker/docker"
+      version = "~> 3.0"
+    }
   }
 
   # Remote state configuration - will be configured during terraform init
@@ -36,11 +40,10 @@ provider "aws" {
   }
 }
 
-# Data source for current AWS caller identity
-data "aws_caller_identity" "current" {}
-
-# Data source for current AWS region
-data "aws_region" "current" {}
-
-# Data source for AWS partition
-data "aws_partition" "current" {}
+provider "docker" {
+  registry_auth {
+    address  = data.aws_ecr_authorization_token.token.proxy_endpoint
+    username = data.aws_ecr_authorization_token.token.user_name
+    password = data.aws_ecr_authorization_token.token.password
+  }
+}

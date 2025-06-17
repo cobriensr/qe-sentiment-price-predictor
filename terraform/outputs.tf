@@ -139,3 +139,26 @@ output "aws_region" {
   description = "AWS region"
   value       = var.aws_region
 }
+
+# ECS outputs
+output "load_balancer_url" {
+  description = "URL of the load balancer"
+  value       = "http://${aws_lb.main.dns_name}"
+}
+
+output "ecr_repository_url" {
+  description = "URL of the ECR repository"
+  value       = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.aws_region}.amazonaws.com/nextjs-app"
+}
+
+# Github Actions outputs
+output "github_actions_access_key_id" {
+  description = "Access Key ID for GitHub Actions user"
+  value       = aws_iam_access_key.github_actions_deploy.id
+}
+
+output "github_actions_secret_access_key" {
+  description = "Secret Access Key for GitHub Actions user"
+  value       = aws_iam_access_key.github_actions_deploy.secret
+  sensitive   = true
+}

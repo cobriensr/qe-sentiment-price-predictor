@@ -48,3 +48,18 @@ variable "tags" {
     ManagedBy = "terraform"
   }
 }
+
+variable "app_name" {
+  description = "Application name"
+  default     = "nextjs-app"
+}
+
+variable "next_public_url" {
+  description = "Next.js public URL"
+  type        = string
+}
+
+variable docker_context_path {
+  description = "Path to the Docker context directory"
+  type        = string
+}

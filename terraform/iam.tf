@@ -159,3 +159,94 @@ resource "aws_iam_role_policy_attachment" "api_gateway_lambda_policy_attachment"
   role       = aws_iam_role.api_gateway_lambda_role.name
   policy_arn = aws_iam_policy.api_gateway_lambda_policy.arn
 }
+
+# IAM user for GitHub Actions deployment
+resource "aws_iam_user" "github_actions_deploy" {
+  name = "${var.project_name}-github-actions-deploy-${var.environment}"
+  path = "/"
+
+  tags = merge(var.tags, {
+    Name        = "${var.project_name}-github-actions-deploy-${var.environment}"
+    Environment = var.environment
+    Purpose     = "GitHub Actions CI/CD"
+  })
+}
+
+# Access key for GitHub Actions user
+resource "aws_iam_access_key" "github_actions_deploy" {
+  user = aws_iam_user.github_actions_deploy.name
+}
+
+# Custom policy for GitHub Actions deployment
+resource "aws_iam_policy" "github_actions_deploy_policy" {
+  name        = "${var.project_name}-github-actions-deploy-policy-${var.environment}"
+  description = "IAM policy for GitHub Actions to deploy to ECR and ECS"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ecr:GetAuthorizationToken",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "ecr:InitiateLayerUpload",
+          "ecr:UploadLayerPart",
+          "ecr:CompleteLayerUpload",
+          "ecr:PutImage"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ecs:DescribeTaskDefinition",
+          "ecs:RegisterTaskDefinition",
+          "ecs:UpdateService",
+          "ecs:DescribeServices",
+          "ecs:DescribeClusters",
+          "ecs:ListTasks",
+          "ecs:DescribeTasks"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "iam:PassRole"
+        ]
+        Resource = [
+          aws_iam_role.ecs_task_execution_role.arn,
+          # Add any other ECS task roles you might have
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "logs:DescribeLogGroups",
+          "logs:DescribeLogStreams"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+
+  tags = merge(var.tags, {
+    Name        = "${var.project_name}-github-actions-deploy-policy-${var.environment}"
+    Environment = var.environment
+    Purpose     = "GitHub Actions CI/CD"
+  })
+}
+
+# Attach the deploy policy to GitHub Actions user
+resource "aws_iam_user_policy_attachment" "github_actions_deploy_policy_attachment" {
+  user       = aws_iam_user.github_actions_deploy.name
+  policy_arn = aws_iam_policy.github_actions_deploy_policy.arn
+}
+
+
