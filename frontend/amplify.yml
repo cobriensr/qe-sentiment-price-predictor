@@ -7,7 +7,12 @@ applications:
           commands:
             - nvm use 20
             - echo "Installing dependencies..."
-            - npm ci --cache .npm --prefer-offline
+            - rm -rf node_modules package-lock.json
+            - npm install
+            - echo "Checking if @aws-amplify/backend is installed..."
+            - npm list @aws-amplify/backend
+            - echo "Checking TypeScript compilation..."
+            - npx tsc --noEmit --project amplify/tsconfig.json
             - echo "Deploying Amplify backend..."
             - npx @aws-amplify/backend-cli@latest pipeline-deploy --branch $AMPLIFY_BRANCH --app-id $APP_ID
     frontend:
