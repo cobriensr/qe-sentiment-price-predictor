@@ -10,8 +10,6 @@ applications:
             - npm install
             - echo "Explicitly installing TypeScript dependencies..."
             - npm install --save-dev typescript @types/node
-            - echo "Verifying TypeScript installation..."
-            - npx tsc --version
            
         build:
           commands:
