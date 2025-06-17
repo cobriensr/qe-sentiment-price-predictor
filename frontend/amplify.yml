@@ -14,11 +14,15 @@ applications:
             - npm install
             - echo "Installing TypeScript globally for AL2023..."
             - npm install -g typescript@latest @types/node@latest
-            - echo "Installing TypeScript locally..."
-            - npm install typescript@latest @types/node@latest --no-package-lock --legacy-peer-deps
+            - echo "Installing ALL TypeScript dependencies locally..."
+            - npm install typescript@latest @types/node@latest @types/react@latest @types/react-dom@latest --save-dev --legacy-peer-deps
+            - echo "Creating symlink to ensure Next.js finds TypeScript..."
+            - mkdir -p node_modules/.bin
+            - ln -sf /root/.nvm/versions/node/v20.19.0/bin/tsc node_modules/.bin/tsc
             - echo "Verifying TypeScript installation..."
             - which tsc || echo "tsc not found globally"
             - npx tsc --version || echo "tsc not available via npx"
+            - ls -la node_modules/.bin/tsc || echo "tsc symlink not found"
            
         build:
           commands:
