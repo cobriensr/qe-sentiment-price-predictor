@@ -16,6 +16,12 @@ applications:
             - echo "Building Next.js application..."
             - echo "Environment $AMPLIFY_BRANCH"
             - echo "API URL $NEXT_PUBLIC_API_URL"
+            - echo "Debugging TypeScript installation..."
+            - ls -la node_modules/.bin | grep tsc || echo "tsc not found in node_modules/.bin"
+            - npm list typescript || echo "typescript not in npm list"
+            - ls -la node_modules/typescript || echo "typescript folder not found"
+            - echo "Checking Next.js config..."
+            - cat next.config.js
             - echo "Building with TypeScript errors ignored..."
             - npm run build
            
