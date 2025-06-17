@@ -1,29 +1,46 @@
-name: Security Scans
+name: Terraform Security Scans
 on:
   pull_request:
     branches: [ main ]
     paths:
       - 'terraform/**'
+      - '**/*.tf'
+      - '**/*.tfvars'
   workflow_dispatch:
   schedule:
     - cron: '0 0 * * *'  # Daily scan
+
 permissions:
   security-events: write
   contents: read
   pull-requests: write
+
 jobs:
-  security-scan:
+  terraform-security-scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Run tfsec
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: latest
+
+      - name: Run tfsec (Terraform Security Scanner)
         uses: aquasecurity/tfsec-sarif-action@v0.1.4
         continue-on-error: true
         with:
-          sarif_file: trivy-terraform-scan.sarif
-    
-      - name: Run Terrascan
+          sarif_file: tfsec-results.sarif
+
+      - name: Upload tfsec SARIF results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: tfsec-results.sarif
+          category: tfsec
+
+      - name: Run Terrascan (Terraform Policy Scanner)
         uses: tenable/terrascan-action@main
         with:
           iac_type: 'terraform'
@@ -35,74 +52,142 @@ jobs:
           iac_dir: 'terraform'
 
       - name: Upload Terrascan SARIF results
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
         with:
           sarif_file: terrascan.sarif
-          wait-for-processing: true
+          category: terrascan
 
-      # Debug step to list available SARIF files
-      - name: List SARIF files
+      - name: Run Checkov (Terraform Static Analysis)
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: terraform/
+          framework: terraform
+          output_format: sarif
+          output_file_path: checkov-results.sarif
+          quiet: true
+          soft_fail: true
+
+      - name: Upload Checkov SARIF results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: checkov-results.sarif
+          category: checkov
+
+      - name: Debug - List all SARIF files
+        if: always()
         run: |
           echo "Available SARIF files:"
-          ls -la trivy-*.sarif || echo "No trivy SARIF files found"
+          find . -name "*.sarif" -type f | while read file; do
+            echo "File: $file"
+            echo "Size: $(wc -l < "$file") lines"
+          done
 
-      - name: Create summary report
+      - name: Create Terraform security summary
         if: github.event_name == 'pull_request'
         run: |
-          echo "## Security Scan Summary" > summary.md
+          echo "# 🔒 Terraform Security Scan Results" > security-summary.md
+          echo "" >> security-summary.md
           
-          echo "### Trivy Filesystem Scan" >> summary.md
-          if [ -f trivy-fs-results.sarif ]; then
-            jq -r '.runs[].results[] | "- \(.level): \(.message.text)"' trivy-fs-results.sarif >> summary.md || echo "No filesystem vulnerabilities found" >> summary.md
-          else
-            echo "Filesystem scan was not completed" >> summary.md
-          fi
-          
-          echo "### Trivy Configuration Scan" >> summary.md
-          if [ -f trivy-config-results.sarif ]; then
-            jq -r '.runs[].results[] | "- \(.level): \(.message.text)"' trivy-config-results.sarif >> summary.md || echo "No configuration vulnerabilities found" >> summary.md
-          else
-            echo "Configuration scan was not completed" >> summary.md
-          fi
-          
-          echo "### Docker Image Scans" >> summary.md
-          for lambda in 1 2 3; do
-            echo "#### Lambda$lambda" >> summary.md
-            if [ -f "trivy-docker-lambda$lambda.sarif" ]; then
-              jq -r '.runs[].results[] | "- \(.level): \(.message.text)"' "trivy-docker-lambda$lambda.sarif" >> summary.md || echo "No vulnerabilities found" >> summary.md
+          # Function to process SARIF and count issues
+          process_sarif() {
+            local file=$1
+            local tool=$2
+            
+            if [ -f "$file" ]; then
+              local high_count=$(jq -r '[.runs[].results[] | select(.level == "error")] | length' "$file" 2>/dev/null || echo "0")
+              local medium_count=$(jq -r '[.runs[].results[] | select(.level == "warning")] | length' "$file" 2>/dev/null || echo "0")
+              local low_count=$(jq -r '[.runs[].results[] | select(.level == "note" or .level == "info")] | length' "$file" 2>/dev/null || echo "0")
+              local total_count=$((high_count + medium_count + low_count))
+              
+              echo "## $tool Results" >> security-summary.md
+              echo "- 🔴 High severity: $high_count" >> security-summary.md
+              echo "- 🟡 Medium severity: $medium_count" >> security-summary.md
+              echo "- 🔵 Low severity: $low_count" >> security-summary.md
+              echo "- **Total issues: $total_count**" >> security-summary.md
+              echo "" >> security-summary.md
+              
+              if [ $total_count -gt 0 ]; then
+                echo "### Top Issues:" >> security-summary.md
+                jq -r '.runs[].results[] | "- **\(.level | ascii_upcase)**: \(.message.text)" | .[0:200]' "$file" 2>/dev/null | head -5 >> security-summary.md || echo "Could not parse detailed results" >> security-summary.md
+                echo "" >> security-summary.md
+              fi
             else
-              echo "Docker scan was not completed" >> summary.md
+              echo "## $tool Results" >> security-summary.md
+              echo "❌ Scan file not found: $file" >> security-summary.md
+              echo "" >> security-summary.md
             fi
-          done
+          }
           
-          echo "### Terraform Scan" >> summary.md
-          if [ -f trivy-terraform-scan.sarif ]; then
-            jq -r '.runs[].results[] | "- \(.level): \(.message.text)"' trivy-terraform-scan.sarif >> summary.md || echo "No Terraform vulnerabilities found" >> summary.md
-          else
-            echo "Terraform scan was not completed" >> summary.md
-          fi
+          # Process each security tool's results
+          process_sarif "tfsec-results.sarif" "🛡️ TFSec"
+          process_sarif "terrascan.sarif" "🔍 Terrascan" 
+          process_sarif "checkov-results.sarif" "✅ Checkov"
           
-          echo "### Python Dependencies Scan" >> summary.md
-          for dir in src/lambda*; do
-            if [ -f "$dir/safety-report.json" ]; then
-              echo "#### $dir" >> summary.md
-              jq -r '.[] | "- \(.dependency): \(.vulnerability)"' "$dir/safety-report.json" >> summary.md || echo "No Python vulnerabilities found" >> summary.md
-            else
-              echo "#### $dir" >> summary.md
-              echo "Python dependency scan was not completed" >> summary.md
-            fi
-          done
+          echo "---" >> security-summary.md
+          echo "📊 **Scan completed at:** $(date)" >> security-summary.md
+          echo "🔗 **View detailed results in the Security tab**" >> security-summary.md
 
-      - name: Comment PR
+      - name: Comment on PR with security summary
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
-            const summary = fs.readFileSync('summary.md', 'utf8');
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: summary
-            });
+            try {
+              const summary = fs.readFileSync('security-summary.md', 'utf8');
+              
+              // Check if there's already a comment from this workflow
+              const comments = await github.rest.issues.listComments({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+              });
+              
+              const existingComment = comments.data.find(comment => 
+                comment.body.includes('🔒 Terraform Security Scan Results')
+              );
+              
+              if (existingComment) {
+                // Update existing comment
+                await github.rest.issues.updateComment({
+                  comment_id: existingComment.id,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: summary
+                });
+              } else {
+                // Create new comment
+                await github.rest.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: summary
+                });
+              }
+            } catch (error) {
+              console.log('Could not read security summary file:', error);
+            }
+
+      - name: Fail workflow if high severity issues found
+        if: always()
+        run: |
+          high_issues=0
+          
+          # Count high severity issues across all tools
+          for file in tfsec-results.sarif terrascan.sarif checkov-results.sarif; do
+            if [ -f "$file" ]; then
+              count=$(jq -r '[.runs[].results[] | select(.level == "error")] | length' "$file" 2>/dev/null || echo "0")
+              high_issues=$((high_issues + count))
+            fi
+          done
+          
+          echo "Total high severity issues found: $high_issues"
+          
+          if [ $high_issues -gt 0 ]; then
+            echo "❌ Workflow failed due to high severity security issues"
+            exit 1
+          else
+            echo "✅ No high severity security issues found"
+          fi
