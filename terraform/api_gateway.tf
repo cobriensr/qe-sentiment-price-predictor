@@ -130,8 +130,8 @@ resource "aws_api_gateway_integration" "sentiment_lambda" {
   http_method = aws_api_gateway_method.sentiment_post.http_method
 
   integration_http_method = "POST"
-  type                   = "AWS_PROXY"
-  uri                    = aws_lambda_function.sentiment_analyzer.invoke_arn
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.sentiment_analyzer.invoke_arn
 }
 
 resource "aws_api_gateway_integration" "stock_lambda" {
@@ -140,8 +140,8 @@ resource "aws_api_gateway_integration" "stock_lambda" {
   http_method = aws_api_gateway_method.stock_get.http_method
 
   integration_http_method = "POST"
-  type                   = "AWS_PROXY"
-  uri                    = aws_lambda_function.stock_data_fetcher.invoke_arn
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.stock_data_fetcher.invoke_arn
 }
 
 resource "aws_api_gateway_integration" "prediction_lambda" {
@@ -150,8 +150,8 @@ resource "aws_api_gateway_integration" "prediction_lambda" {
   http_method = aws_api_gateway_method.prediction_post.http_method
 
   integration_http_method = "POST"
-  type                   = "AWS_PROXY"
-  uri                    = aws_lambda_function.prediction_engine.invoke_arn
+  type                    = "AWS_PROXY"
+  uri                     = aws_lambda_function.prediction_engine.invoke_arn
 }
 
 # Mock integrations for OPTIONS methods (CORS)
@@ -242,6 +242,18 @@ resource "aws_api_gateway_method_response" "prediction_post_200" {
   }
 }
 
+# Health endpoint method response (MISSING - added)
+resource "aws_api_gateway_method_response" "health_get_200" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  resource_id = aws_api_gateway_resource.health.id
+  http_method = aws_api_gateway_method.health_get.http_method
+  status_code = "200"
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin" = true
+  }
+}
+
 # OPTIONS method responses for CORS
 resource "aws_api_gateway_method_response" "sentiment_options_200" {
   rest_api_id = aws_api_gateway_rest_api.main.id
@@ -280,6 +292,72 @@ resource "aws_api_gateway_method_response" "prediction_options_200" {
     "method.response.header.Access-Control-Allow-Methods" = true
     "method.response.header.Access-Control-Allow-Origin"  = true
   }
+}
+
+# Integration responses for Lambda methods
+resource "aws_api_gateway_integration_response" "sentiment_lambda_integration_response" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  resource_id = aws_api_gateway_resource.sentiment.id
+  http_method = aws_api_gateway_method.sentiment_post.http_method
+  status_code = aws_api_gateway_method_response.sentiment_post_200.status_code
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin" = "'*'"
+  }
+
+  depends_on = [aws_api_gateway_integration.sentiment_lambda]
+}
+
+resource "aws_api_gateway_integration_response" "stock_lambda_integration_response" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  resource_id = aws_api_gateway_resource.stock_symbol.id
+  http_method = aws_api_gateway_method.stock_get.http_method
+  status_code = aws_api_gateway_method_response.stock_get_200.status_code
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin" = "'*'"
+  }
+
+  depends_on = [aws_api_gateway_integration.stock_lambda]
+}
+
+resource "aws_api_gateway_integration_response" "prediction_lambda_integration_response" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  resource_id = aws_api_gateway_resource.prediction.id
+  http_method = aws_api_gateway_method.prediction_post.http_method
+  status_code = aws_api_gateway_method_response.prediction_post_200.status_code
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin" = "'*'"
+  }
+
+  depends_on = [aws_api_gateway_integration.prediction_lambda]
+}
+
+# Health endpoint integration response (MISSING - added)
+resource "aws_api_gateway_integration_response" "health_integration_response" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  resource_id = aws_api_gateway_resource.health.id
+  http_method = aws_api_gateway_method.health_get.http_method
+  status_code = "200"
+
+  response_templates = {
+    "application/json" = jsonencode({
+      status = "healthy"
+      timestamp = "$context.requestTime"
+      api_version = "v1"
+      message = "API is running successfully"
+    })
+  }
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin" = "'*'"
+  }
+
+  depends_on = [
+    aws_api_gateway_integration.health_mock,
+    aws_api_gateway_method_response.health_get_200
+  ]
 }
 
 # Integration responses for OPTIONS methods
@@ -338,6 +416,13 @@ resource "aws_api_gateway_deployment" "main" {
     aws_api_gateway_integration.stock_options_mock,
     aws_api_gateway_integration.prediction_options_mock,
     aws_api_gateway_integration.health_mock,
+    aws_api_gateway_integration_response.sentiment_lambda_integration_response,
+    aws_api_gateway_integration_response.stock_lambda_integration_response,
+    aws_api_gateway_integration_response.prediction_lambda_integration_response,
+    aws_api_gateway_integration_response.health_integration_response,
+    aws_api_gateway_integration_response.sentiment_options_integration_response,
+    aws_api_gateway_integration_response.stock_options_integration_response,
+    aws_api_gateway_integration_response.prediction_options_integration_response,
     aws_api_gateway_method.sentiment_post,
     aws_api_gateway_method.stock_get,
     aws_api_gateway_method.prediction_post,
@@ -362,6 +447,8 @@ resource "aws_api_gateway_deployment" "main" {
       aws_api_gateway_integration.sentiment_lambda.id,
       aws_api_gateway_integration.stock_lambda.id,
       aws_api_gateway_integration.prediction_lambda.id,
+      aws_api_gateway_integration.health_mock.id,
+      aws_api_gateway_integration_response.health_integration_response.id,
     ]))
   }
 
@@ -380,4 +467,29 @@ resource "aws_api_gateway_stage" "main" {
     Name        = "${var.project_name}-api-stage-${var.environment}"
     Environment = var.environment
   })
+}
+
+# Lambda permissions for API Gateway to invoke functions
+resource "aws_lambda_permission" "sentiment_analyzer_api_gateway" {
+  statement_id  = "AllowExecutionFromAPIGateway-${var.environment}"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.sentiment_analyzer.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_api_gateway_rest_api.main.execution_arn}/*/*"
+}
+
+resource "aws_lambda_permission" "stock_data_fetcher_api_gateway" {
+  statement_id  = "AllowExecutionFromAPIGateway-${var.environment}"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.stock_data_fetcher.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_api_gateway_rest_api.main.execution_arn}/*/*"
+}
+
+resource "aws_lambda_permission" "prediction_engine_api_gateway" {
+  statement_id  = "AllowExecutionFromAPIGateway-${var.environment}"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.prediction_engine.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_api_gateway_rest_api.main.execution_arn}/*/*"
 }

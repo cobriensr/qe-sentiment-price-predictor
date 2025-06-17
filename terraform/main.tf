@@ -19,6 +19,10 @@ terraform {
       source  = "kreuzwerker/docker"
       version = "~> 3.0"
     }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0"
+    }
   }
 
   # Remote state configuration - will be configured during terraform init
@@ -46,4 +50,8 @@ provider "docker" {
     username = data.aws_ecr_authorization_token.token.user_name
     password = data.aws_ecr_authorization_token.token.password
   }
+}
+
+provider "tls" {
+  # No configuration needed for TLS provider
 }

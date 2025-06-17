@@ -38,7 +38,7 @@ resource "aws_ecr_lifecycle_policy" "app" {
 # Build and push Docker image
 resource "docker_image" "app" {
   name = "${aws_ecr_repository.app.repository_url}:latest"
-  
+
   build {
     context    = var.docker_context_path
     dockerfile = "Dockerfile"

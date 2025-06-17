@@ -59,7 +59,7 @@ variable "next_public_url" {
   type        = string
 }
 
-variable docker_context_path {
+variable "docker_context_path" {
   description = "Path to the Docker context directory"
   type        = string
 }

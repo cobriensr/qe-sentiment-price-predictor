@@ -195,7 +195,10 @@ resource "aws_iam_policy" "github_actions_deploy_policy" {
           "ecr:InitiateLayerUpload",
           "ecr:UploadLayerPart",
           "ecr:CompleteLayerUpload",
-          "ecr:PutImage"
+          "ecr:PutImage",
+          "ecr:DescribeRepositories",
+          "ecr:DescribeImages",
+          "ecr:ListImages"
         ]
         Resource = "*"
       },
@@ -248,5 +251,3 @@ resource "aws_iam_user_policy_attachment" "github_actions_deploy_policy_attachme
   user       = aws_iam_user.github_actions_deploy.name
   policy_arn = aws_iam_policy.github_actions_deploy_policy.arn
 }
-
-

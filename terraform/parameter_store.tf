@@ -1,4 +1,4 @@
-# Store credentials in AWS Systems Manager Parameter Store (optional but recommended)
+# Store credentials in AWS Systems Manager Parameter Store
 resource "aws_ssm_parameter" "github_actions_access_key_id" {
   name  = "/${var.project_name}/${var.environment}/github-actions/access-key-id"
   type  = "String"

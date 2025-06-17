@@ -1,8 +1,9 @@
-# API Gateway outputs
+# Output API Gateway URL
 output "api_gateway_url" {
-  description = "Base URL for API Gateway stage"
-  value       = "https://${aws_api_gateway_rest_api.main.id}.execute-api.${var.aws_region}.amazonaws.com/${aws_api_gateway_stage.main.stage_name}"
+  description = "URL of the API Gateway"
+  value       = "https://${aws_api_gateway_rest_api.main.id}.execute-api.${data.aws_region.current.name}.amazonaws.com/${aws_api_gateway_stage.main.stage_name}"
 }
+
 
 output "api_gateway_id" {
   description = "ID of the API Gateway"
@@ -161,4 +162,15 @@ output "github_actions_secret_access_key" {
   description = "Secret Access Key for GitHub Actions user"
   value       = aws_iam_access_key.github_actions_deploy.secret
   sensitive   = true
+}
+
+# https outputs
+output "http_url" {
+  description = "HTTP URL (redirects to HTTPS)"
+  value       = "http://${aws_lb.main.dns_name}"
+}
+
+output "https_url" {
+  description = "HTTPS URL of the application"
+  value       = "https://${aws_lb.main.dns_name}"
 }

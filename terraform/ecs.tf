@@ -115,7 +115,7 @@ resource "aws_lb" "main" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.alb.id]
-  subnets           = aws_subnet.public[*].id
+  subnets            = aws_subnet.public[*].id
 
   tags = {
     Name = "${var.app_name}-alb"
@@ -144,18 +144,6 @@ resource "aws_lb_target_group" "app" {
 
   tags = {
     Name = "${var.app_name}-tg"
-  }
-}
-
-# ALB Listener
-resource "aws_lb_listener" "app" {
-  load_balancer_arn = aws_lb.main.arn
-  port              = "80"
-  protocol          = "HTTP"
-
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.app.arn
   }
 }
 
@@ -209,7 +197,7 @@ resource "aws_ecs_task_definition" "app" {
     {
       name  = var.app_name
       image = "${aws_ecr_repository.app.repository_url}:latest"
-      
+
       portMappings = [
         {
           containerPort = 3000
@@ -241,7 +229,7 @@ resource "aws_ecs_task_definition" "app" {
     }
   ])
 
-  depends_on = [docker_registry_image.app]  # <- Add this to ensure image is pushed first
+  depends_on = [docker_registry_image.app] # <- Add this to ensure image is pushed first
 
   tags = {
     Name = "${var.app_name}-task"
@@ -268,7 +256,7 @@ resource "aws_ecs_service" "app" {
 
   network_configuration {
     security_groups  = [aws_security_group.ecs.id]
-    subnets         = aws_subnet.public[*].id
+    subnets          = aws_subnet.public[*].id
     assign_public_ip = true
   }
 
@@ -278,7 +266,10 @@ resource "aws_ecs_service" "app" {
     container_port   = 3000
   }
 
-  depends_on = [aws_lb_listener.app]
+  depends_on = [
+    aws_lb_listener.app_https,
+    aws_lb_listener.app_http_redirect
+  ]
 
   tags = {
     Name = "${var.app_name}-service"
