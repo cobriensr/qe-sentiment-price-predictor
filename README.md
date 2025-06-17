@@ -1,6 +1,6 @@
 # Earnings Sentiment Analyzer
 
-A machine learning application that analyzes earnings call sentiment to predict stock price movements using AWS serverless architecture.
+A machine learning application that analyzes earnings call sentiment to predict stock price movements using AWS containerized architecture.
 
 ## 🎯 Project Overview
 
@@ -16,8 +16,9 @@ This project analyzes quarterly earnings call transcripts to predict stock perfo
 
 ```mermaid
 graph LR
-    User[👤 User] --> Frontend[📱 Next.js Frontend<br/>Tailwind CSS]
-    Frontend --> API[🔌 API Gateway]
+    User[👤 User] --> ALB[⚖️ Application Load Balancer]
+    ALB --> ECS[🐳 ECS Fargate<br/>Next.js Frontend]
+    ECS --> API[🔌 API Gateway]
     API --> Lambda1[⚡ Sentiment Analysis]
     API --> Lambda2[📈 Stock Data]
     API --> Lambda3[🤖 Price Prediction]
@@ -28,6 +29,8 @@ graph LR
 
     Lambda2 --> AlphaVantage[📊 Alpha Vantage API]
     Lambda1 --> SEC[🏛️ SEC EDGAR API]
+    
+    ECS --> ECR[🏗️ ECR: Container Registry]
 ```
 
 ### Planned Features (Phases 2-4)
@@ -56,16 +59,20 @@ graph TB
 ### Tech Stack
 
 - **Frontend**: Next.js 15, React 19, Tailwind CSS
+- **Container**: Docker, ECS Fargate, ECR
 - **Backend**: AWS Lambda, API Gateway, DynamoDB
 - **ML**: Python, scikit-learn, sentiment analysis models
-- **Infrastructure**: Terraform, AWS Amplify
+- **Infrastructure**: Terraform, Application Load Balancer
 - **APIs**: Alpha Vantage (stock data), SEC EDGAR (earnings)
 
 ## 📊 Deployment Status
 
 ### ✅ Phase 1: Core Infrastructure (DEPLOYED)
 
-- **Frontend**: Next.js app ready for Amplify deployment
+- **Frontend**: Next.js app containerized and deployed on ECS Fargate
+- **Container Registry**: ECR repository for Docker images
+- **Load Balancer**: ALB with SSL termination and health checks
+- **Auto Scaling**: ECS service with automatic scaling policies
 - **API Gateway**: API Gateway deployed
 - **Lambda Functions**: 3 functions with placeholder code
 - **Storage**: S3 buckets and DynamoDB tables configured
@@ -97,6 +104,7 @@ graph TB
 ### Prerequisites
 
 - AWS CLI configured
+- Docker Desktop
 - Terraform >= 1.0
 - Node.js >= 18
 - Python >= 3.11
@@ -126,7 +134,20 @@ terraform plan -var-file="environments/dev.tfvars"
 terraform apply -var-file="environments/dev.tfvars"
 ```
 
-### 3. Local Development
+### 3. Deploy Application
+
+```bash
+# Build and push Docker image
+cd frontend
+docker build -t earnings-sentiment-frontend .
+docker tag earnings-sentiment-frontend:latest <account-id>.dkr.ecr.us-east-1.amazonaws.com/nextjs-app:latest
+docker push <account-id>.dkr.ecr.us-east-1.amazonaws.com/nextjs-app:latest
+
+# Deploy using GitHub Actions (recommended)
+git push origin main  # Triggers CI/CD pipeline
+```
+
+### 4. Local Development
 
 ```bash
 # Setup local environment
@@ -156,21 +177,31 @@ DEV_API_URL="get-from-output"
 ML_MODELS_BUCKET="get-from-output"
 EARNINGS_DATA_BUCKET="get-from-output"
 
+# Container Registry
+ECR_REPOSITORY="nextjs-app"
+ECR_REGISTRY="<account-id>.dkr.ecr.us-east-1.amazonaws.com"
+
+# ECS Configuration
+ECS_CLUSTER="nextjs-app-cluster"
+ECS_SERVICE="nextjs-app-service"
+ECS_TASK_DEFINITION="nextjs-app-task"
+
 # Required API Keys
 ALPHA_VANTAGE_API_KEY="get-from-alphavantage.co"
 
-# Amplify (when deployed)
-AMPLIFY_APP_ID_DEV="your-amplify-app-id"
+# Load Balancer (from Terraform output)
+ALB_DNS_NAME="get-from-terraform-output"
 ```
 
 ## 🛠️ Tech Stack
 
 **Frontend:**
 
-- **Next.js 14** with TypeScript
+- **Next.js 15** with TypeScript
 - **Tailwind CSS** for styling
 - **Recharts** for data visualization
-- **AWS Amplify** for hosting
+- **Docker** for containerization
+- **ECS Fargate** for hosting
 
 **Backend:**
 
@@ -184,8 +215,10 @@ AMPLIFY_APP_ID_DEV="your-amplify-app-id"
 
 - **Terraform** for Infrastructure as Code
 - **GitHub Actions** for CI/CD
-- **Docker** for local development
-- **AWS** for cloud services
+- **Docker** for containerization
+- **AWS ECS Fargate** for container orchestration
+- **Application Load Balancer** for traffic distribution
+- **ECR** for container registry
 
 **ML/Data:**
 
@@ -201,7 +234,8 @@ earnings-sentiment-analyzer/
 ├── frontend/                 # Next.js application
 │   ├── src/
 │   ├── package.json
-│   └── amplify.yml
+│   ├── Dockerfile
+│   └── .dockerignore
 ├── backend/                  # Python FastAPI
 │   ├── src/
 │   ├── models/
@@ -218,6 +252,17 @@ earnings-sentiment-analyzer/
 ```
 
 ## 🔄 Development Workflow
+
+### CI/CD Pipeline
+
+The project uses GitHub Actions for automated deployment:
+
+1. **Code Push**: Developer pushes to `main` branch
+2. **Build**: Docker image built from Next.js application
+3. **Test**: Run unit tests and linting
+4. **Push**: Image pushed to ECR registry
+5. **Deploy**: ECS service updated with new image
+6. **Health Check**: ALB verifies application health
 
 ### Phase 1 Development (Current)
 
@@ -237,7 +282,7 @@ Each phase builds incrementally on the previous infrastructure, adding new capab
 - `POST /sentiment` - Analyze earnings transcript sentiment
 - `GET /stock/{symbol}` - Fetch stock data and recent earnings
 - `POST /prediction` - Generate stock performance predictions
-- `GET /health` - Service health check
+- `GET /health` - Service health check (used by ALB)
 
 ### Future Endpoints (Planned)
 
@@ -246,11 +291,36 @@ Each phase builds incrementally on the previous infrastructure, adding new capab
 - `GET /sectors` - Sector-wide sentiment trends
 - `GET /reports` - Advanced analytics reports
 
+## 🐳 Container Configuration
+
+### Dockerfile Optimization
+
+The application uses a multi-stage Docker build for optimal image size:
+
+```dockerfile
+# Production image optimizations:
+- Multi-stage build with separate deps and builder stages
+- Node.js 20 Alpine base image
+- Standalone output for minimal runtime
+- Non-root user for security
+- Health checks for ECS integration
+```
+
+### ECS Service Configuration
+
+- **Fargate**: Serverless container execution
+- **Auto Scaling**: 1-10 tasks based on CPU/memory
+- **Health Checks**: ALB monitors `/api/health` endpoint
+- **Rolling Updates**: Zero-downtime deployments
+- **Service Discovery**: Internal DNS for service communication
+
 ## 🔐 Security & Compliance
 
 - **Encryption**: All data encrypted at rest and in transit
-- **IAM**: Least-privilege access controls
-- **VPC**: Network isolation for sensitive operations
+- **IAM**: Least-privilege access controls for ECS tasks
+- **VPC**: Private subnets for ECS tasks, public for ALB
+- **Security Groups**: Restrictive network access rules
+- **Container Security**: Non-root user, minimal base image
 - **Monitoring**: CloudWatch logging and alerting
 - **Backup**: Point-in-time recovery for all databases
 
@@ -258,20 +328,44 @@ Each phase builds incrementally on the previous infrastructure, adding new capab
 
 **Current (Phase 1) - Development:**
 
-- Estimated cost: $10-20/month
-- Pay-per-request pricing for low usage
-- 14-day log retention to minimize storage costs
+- Estimated cost: $15-30/month
+- ECS Fargate pricing: ~$0.04048/vCPU/hour + $0.004445/GB/hour
+- ALB: $16.20/month + $0.008/LCU-hour
+- ECR: $0.10/GB/month for storage
 
 **Production Scaling:**
 
-- Auto-scaling based on demand
+- Auto-scaling based on demand (1-10 tasks)
+- Spot capacity for cost savings on non-critical workloads
 - Reserved capacity for predictable workloads
-- Lifecycle policies for data archival
+- Lifecycle policies for ECR image cleanup
 
-## Deploying to Amplify
+## 🚀 Deployment Optimization
 
-- When deploying to amplify you might need to copy and paste the contents of amplify.ymnl into the build settings.
-- Sometimes Amplify gets "stuck" with certain configurations and may require manual intervention.
+### Fast Deployments
+
+For rapid iteration during development:
+
+```bash
+# Optimized deployment configuration
+- minimumHealthyPercent: 50% (faster task replacement)
+- maximumPercent: 200% (parallel deployments)
+- Health check intervals: 10s (faster health detection)
+- Docker layer caching for faster builds
+```
+
+### Health Check Endpoint
+
+The application includes a health check endpoint for ECS:
+
+```typescript
+// /api/health endpoint returns:
+{
+  "status": "healthy",
+  "timestamp": "2025-06-16T...",
+  "uptime": 42.5
+}
+```
 
 ## 🤝 Contributing
 
@@ -288,7 +382,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - **Alpha Vantage** for stock market data API
-- **AWS** for serverless infrastructure
+- **AWS** for containerized infrastructure
+- **Docker** for containerization platform
 - **Terraform** for infrastructure automation
 - **Next.js** team for the excellent frontend framework
 
