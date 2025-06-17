@@ -16,10 +16,8 @@ applications:
             - echo "Building Next.js application..."
             - echo "Environment $AMPLIFY_BRANCH"
             - echo "API URL $NEXT_PUBLIC_API_URL"
-            - echo "Disabling TypeScript checking for build..."
-            - npm run build -- --no-lint
-            - echo "Build completed, checking if TypeScript failed..."
-            - if [ $? -ne 0 ]; then echo "Build failed, trying without TypeScript..."; DISABLE_ESLINT_PLUGIN=true npm run build; fi
+            - echo "Building with TypeScript errors ignored..."
+            - npm run build
            
         postBuild:
           commands:
@@ -28,7 +26,7 @@ applications:
             - ls -la out/
            
       artifacts:
-        baseDirectory: out
+        baseDirectory: .next
         files:
           - '**/*'
          
