@@ -1,20 +1,6 @@
 version: 1
 applications:
   - appRoot: frontend
-    backend:
-      phases:
-        build:
-          commands:
-            - nvm use 20
-            - echo "Installing dependencies..."
-            - npm install
-            - echo "Explicitly installing Amplify backend packages..."
-            - npm install @aws-amplify/backend@^1.16.1 @aws-amplify/backend-cli@^1.8.0
-            - echo "Verifying installation..."
-            - npm list @aws-amplify/backend
-            - npm list @aws-amplify/backend-cli
-            - echo "Deploying Amplify backend..."
-            - npx @aws-amplify/backend-cli@latest pipeline-deploy --branch $AMPLIFY_BRANCH --app-id $APP_ID
     frontend:
       phases:
         preBuild:
@@ -45,7 +31,6 @@ applications:
         paths:
           - node_modules/**/*
           - .next/cache/**/*
-          - .npm/**/*
          
     environmentVariables:
       - NEXT_PUBLIC_ENVIRONMENT: $AMPLIFY_BRANCH
