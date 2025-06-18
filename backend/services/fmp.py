@@ -1,82 +1,60 @@
 """
-Simple Lambda function to fetch earnings calendar data and store in DynamoDB.
-Runs nightly to keep earnings calendar up to date.
+Lambda function that retrieves earnings calendar data from Financial Modeling Prep (FMP) API
+and stores it in DynamoDB. It uses AWS Systems Manager Parameter Store for configuration.
 """
 
 import os
 import json
-from typing import List, Dict, Any, Optional
-from datetime import datetime, timedelta
 from decimal import Decimal
-import boto3
+from typing import List, Dict, Any
+from datetime import datetime, timedelta
 import requests
+import boto3
 
-
-def get_parameter_value(parameter_name: str, region: str) -> Optional[str]:
-    """Get parameter from AWS Systems Manager Parameter Store"""
-    try:
-        ssm = boto3.client("ssm", region_name=region)
-        response = ssm.get_parameter(Name=parameter_name, WithDecryption=True)
-        return response["Parameter"]["Value"]
-    except Exception as e:
-        print(f"Could not retrieve parameter {parameter_name}: {e}")
-        return None
-
-def get_config_value(env_var_name: str, fallback_parameter_path: str = None) -> str:
-    """Get value from environment variable or fallback to Parameter Store"""
-    # Try environment variable first (this will work in production)
-    value = os.environ.get(env_var_name)
-
-    if value:
-        return value
-
-    # Fallback to Parameter Store (for local testing)
-    if fallback_parameter_path:
-        print(
-            f"Environment variable {env_var_name} not found, checking Parameter Store..."
-        )
-        aws_region = os.environ.get("AWS_REGION", "us-east-1")
-        value = get_parameter_value(fallback_parameter_path, aws_region)
-
-        if value:
-            print(f"Retrieved {env_var_name} from Parameter Store")
-            return value
-
-    raise ValueError(
-        f"Could not find {env_var_name} in environment variables or Parameter Store"
-    )
-
-# Get configuration values
-PROJECT_NAME = os.environ.get("PROJECT_NAME", "qe-sentiment-price-predictor")
+# AWS Configuration - these can be defaults
+AWS_REGION = os.environ.get("AWS_REGION", "us-east-1")
+PROJECT_NAME = os.environ.get("PROJECT_NAME", "earnings-sentiment")
 ENVIRONMENT = os.environ.get("ENVIRONMENT", "dev")
 
-# AWS automatically provides this in Lambda
-AWS_REGION = os.environ.get("AWS_REGION", "us-east-1")
 
-# Get API key and table name with Parameter Store fallback
-FMP_API_KEY = get_config_value(
-    "FMP_API_KEY", f"/{PROJECT_NAME}/{ENVIRONMENT}/fmp-api-key"
-)
-
-EARNINGS_CALENDAR_TABLE = get_config_value(
-    "EARNINGS_CALENDAR_TABLE", f"/{PROJECT_NAME}/{ENVIRONMENT}/earnings-calendar-table"
-)
-
-# AWS clients
-dynamodb = boto3.resource("dynamodb", region_name=AWS_REGION)
+# Always use Parameter Store (local and AWS)
+def get_parameter(parameter_name: str) -> str:
+    """Get parameter from AWS Systems Manager Parameter Store"""
+    try:
+        ssm = boto3.client("ssm", region_name=AWS_REGION)
+        response = ssm.get_parameter(Name=parameter_name, WithDecryption=True)
+        print(f"✅ Retrieved {parameter_name} from Parameter Store")
+        return response["Parameter"]["Value"]
+    except Exception as e:
+        print(f"❌ Error getting parameter {parameter_name}: {e}")
+        raise e
 
 
 def lambda_handler(event, context):
     """Main Lambda handler - fetch earnings calendar and store in DynamoDB"""
-    print("Starting earnings calendar data fetch...")
+    print(f"Starting earnings calendar data fetch in region: {AWS_REGION}")
+    print(f"Request ID: {context.aws_request_id}")
+    print(f"Event: {event}")
 
     try:
-        # 1. Fetch earnings calendar data from FMP
-        earnings_data = get_earnings_calendar()
+        # Always get config from Parameter Store
+        print("Getting configuration from Parameter Store...")
+        fmp_api_key = get_parameter(f"/{PROJECT_NAME}/{ENVIRONMENT}/fmp-api-key")
+        table_name = get_parameter(
+            f"/{PROJECT_NAME}/{ENVIRONMENT}/earnings-calendar-table"
+        )
+
+        print(f"Using table: {table_name}")
+
+        # Initialize DynamoDB after getting config
+        dynamodb = boto3.resource("dynamodb", region_name=AWS_REGION)
+
+        # Fetch earnings calendar data from FMP
+        earnings_data = get_earnings_calendar(fmp_api_key)
         print(f"Fetched {len(earnings_data)} earnings events")
 
-        # 2. Store in DynamoDB
-        store_earnings_calendar(earnings_data)
+        # Store in DynamoDB
+        store_earnings_calendar(earnings_data, table_name, dynamodb)
 
         return {
             "statusCode": 200,
@@ -93,7 +71,7 @@ def lambda_handler(event, context):
         return {"statusCode": 500, "body": json.dumps({"error": str(e)})}
 
 
-def get_earnings_calendar() -> List[Dict[str, Any]]:
+def get_earnings_calendar(api_key: str) -> List[Dict[str, Any]]:
     """Get earnings calendar data from Financial Modeling Prep API."""
 
     # Get date range (yesterday to 90 days ahead)
@@ -104,7 +82,7 @@ def get_earnings_calendar() -> List[Dict[str, Any]]:
     ninety_days_ahead_str = ninety_days_ahead.strftime("%Y-%m-%d")
 
     url = "https://financialmodelingprep.com/stable/earnings-calendar"
-    params = {"from": yesterday_str, "to": ninety_days_ahead_str, "apikey": FMP_API_KEY}
+    params = {"from": yesterday_str, "to": ninety_days_ahead_str, "apikey": api_key}
 
     try:
         response = requests.get(url, params=params, timeout=30)
@@ -119,10 +97,12 @@ def get_earnings_calendar() -> List[Dict[str, Any]]:
         raise e
 
 
-def store_earnings_calendar(earnings_data: List[Dict[str, Any]]):
+def store_earnings_calendar(
+    earnings_data: List[Dict[str, Any]], table_name: str, dynamodb
+):
     """Store earnings calendar data in DynamoDB."""
 
-    table = dynamodb.Table(EARNINGS_CALENDAR_TABLE)
+    table = dynamodb.Table(table_name)
 
     with table.batch_writer() as batch:
         for item in earnings_data:
