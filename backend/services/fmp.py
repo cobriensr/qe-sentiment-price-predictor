@@ -22,7 +22,6 @@ def get_parameter_value(parameter_name: str, region: str) -> Optional[str]:
         print(f"Could not retrieve parameter {parameter_name}: {e}")
         return None
 
-
 def get_config_value(env_var_name: str, fallback_parameter_path: str = None) -> str:
     """Get value from environment variable or fallback to Parameter Store"""
     # Try environment variable first (this will work in production)
@@ -47,10 +46,11 @@ def get_config_value(env_var_name: str, fallback_parameter_path: str = None) -> 
         f"Could not find {env_var_name} in environment variables or Parameter Store"
     )
 
-
 # Get configuration values
 PROJECT_NAME = os.environ.get("PROJECT_NAME", "qe-sentiment-price-predictor")
 ENVIRONMENT = os.environ.get("ENVIRONMENT", "dev")
+
+# AWS automatically provides this in Lambda
 AWS_REGION = os.environ.get("AWS_REGION", "us-east-1")
 
 # Get API key and table name with Parameter Store fallback

@@ -137,7 +137,6 @@ resource "aws_lambda_function" "earnings_calendar_lambda" {
       EARNINGS_CALENDAR_TABLE  = aws_dynamodb_table.earnings_cache.name
       PROJECT_NAME             = var.project_name
       ENVIRONMENT             = var.environment
-      AWS_REGION              = data.aws_region.current.name
     }
   }
 
