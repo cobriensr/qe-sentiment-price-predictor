@@ -123,19 +123,19 @@ resource "aws_lambda_permission" "prediction_engine_api_permission" {
 
 # Lambda function using container image
 resource "aws_lambda_function" "earnings_calendar_lambda" {
-  image_uri    = "${aws_ecr_repository.lambda_repo.repository_url}:latest"
-  package_type = "Image"
+  image_uri     = "${aws_ecr_repository.lambda_repo.repository_url}:latest"
+  package_type  = "Image"
   function_name = "${var.project_name}-earnings-calendar-${var.environment}"
-  role         = aws_iam_role.earnings_lambda_role.arn
-  timeout      = 300
-  memory_size  = 256
+  role          = aws_iam_role.earnings_lambda_role.arn
+  timeout       = 300
+  memory_size   = 256
 
   # THIS IS WHERE THE ENVIRONMENT BLOCK GOES
   environment {
     variables = {
-      FMP_API_KEY              = var.fmp_api_key
-      EARNINGS_CALENDAR_TABLE  = aws_dynamodb_table.earnings_cache.name
-      PROJECT_NAME             = var.project_name
+      FMP_API_KEY             = var.fmp_api_key
+      EARNINGS_CALENDAR_TABLE = aws_dynamodb_table.earnings_cache.name
+      PROJECT_NAME            = var.project_name
       ENVIRONMENT             = var.environment
     }
   }

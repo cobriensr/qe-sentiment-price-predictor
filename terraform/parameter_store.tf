@@ -26,7 +26,7 @@ resource "aws_ssm_parameter" "fmp_api_key" {
   name  = "/${var.project_name}/${var.environment}/fmp-api-key"
   type  = "SecureString"
   value = var.fmp_api_key
-  
+
   tags = merge(var.tags, {
     Name        = "${var.project_name}-fmp-api-key-${var.environment}"
     Environment = var.environment
@@ -38,7 +38,7 @@ resource "aws_ssm_parameter" "earnings_table_name" {
   name  = "/${var.project_name}/${var.environment}/earnings-calendar-table"
   type  = "String"
   value = aws_dynamodb_table.earnings_cache.name
-  
+
   tags = merge(var.tags, {
     Name        = "${var.project_name}-earnings-table-name-${var.environment}"
     Environment = var.environment
@@ -50,7 +50,7 @@ resource "aws_ssm_parameter" "alpha_vantage_api_key" {
   name  = "/${var.project_name}/${var.environment}/alpha-vantage-api-key"
   type  = "SecureString"
   value = var.alpha_vantage_api_key
-  
+
   tags = merge(var.tags, {
     Name        = "${var.project_name}-alpha-vantage-api-key-${var.environment}"
     Environment = var.environment

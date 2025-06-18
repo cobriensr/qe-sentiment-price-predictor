@@ -311,3 +311,51 @@ resource "aws_iam_role" "earnings_lambda_role" {
     Purpose     = "Earnings calendar lambda execution role"
   })
 }
+
+# Lambda permissions for API Gateway to invoke functions
+resource "aws_lambda_permission" "sentiment_analyzer_api_gateway" {
+  statement_id  = "AllowExecutionFromAPIGateway-${var.environment}"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.sentiment_analyzer.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_api_gateway_rest_api.main.execution_arn}/*/*"
+}
+
+resource "aws_lambda_permission" "stock_data_fetcher_api_gateway" {
+  statement_id  = "AllowExecutionFromAPIGateway-${var.environment}"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.stock_data_fetcher.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_api_gateway_rest_api.main.execution_arn}/*/*"
+}
+
+resource "aws_lambda_permission" "prediction_engine_api_gateway" {
+  statement_id  = "AllowExecutionFromAPIGateway-${var.environment}"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.prediction_engine.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_api_gateway_rest_api.main.execution_arn}/*/*"
+}
+
+# ECS Task Execution Role
+resource "aws_iam_role" "ecs_task_execution_role" {
+  name = "${var.app_name}-ecs-task-execution-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ecs-tasks.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
+  role       = aws_iam_role.ecs_task_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}

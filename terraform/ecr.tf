@@ -39,11 +39,11 @@ resource "aws_ecr_lifecycle_policy" "app" {
 resource "docker_image" "app" {
   name = "${aws_ecr_repository.app.repository_url}:latest"
   build {
-    context    = var.docker_context_path  # "./frontend"
+    context    = var.docker_context_path # "./frontend"
     dockerfile = "Dockerfile"
     platform   = "linux/amd64"
   }
-  
+
   triggers = {
     # Rebuild when any file in the frontend context changes
     frontend_hash = sha1(join("", [for f in fileset(var.docker_context_path, "**") : filesha1("${var.docker_context_path}/${f}")]))
@@ -62,11 +62,11 @@ resource "docker_registry_image" "app" {
 resource "aws_ecr_repository" "lambda_repo" {
   name                 = "${var.app_name}-lambda"
   image_tag_mutability = "MUTABLE"
-  
+
   image_scanning_configuration {
     scan_on_push = true
   }
-  
+
   tags = {
     Name = "${var.app_name}-lambda-ecr"
   }
@@ -101,15 +101,15 @@ resource "docker_image" "lambda_image" {
     dockerfile = "Dockerfile"
     platform   = "linux/amd64"
   }
-  
+
   triggers = {
     # This should rebuild when your code changes
     services_hash = sha1(join("", [
-      for f in fileset("../backend/services", "*.py") : 
+      for f in fileset("../backend/services", "*.py") :
       filesha1("../backend/services/${f}")
     ]))
     requirements_hash = filesha1("../backend/services/requirements.txt")
-    dockerfile_hash = filesha1("../backend/services/Dockerfile")
+    dockerfile_hash   = filesha1("../backend/services/Dockerfile")
   }
 }
 

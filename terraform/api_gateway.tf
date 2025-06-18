@@ -343,10 +343,10 @@ resource "aws_api_gateway_integration_response" "health_integration_response" {
 
   response_templates = {
     "application/json" = jsonencode({
-      status = "healthy"
-      timestamp = "$context.requestTime"
+      status      = "healthy"
+      timestamp   = "$context.requestTime"
       api_version = "v1"
-      message = "API is running successfully"
+      message     = "API is running successfully"
     })
   }
 
@@ -467,29 +467,4 @@ resource "aws_api_gateway_stage" "main" {
     Name        = "${var.project_name}-api-stage-${var.environment}"
     Environment = var.environment
   })
-}
-
-# Lambda permissions for API Gateway to invoke functions
-resource "aws_lambda_permission" "sentiment_analyzer_api_gateway" {
-  statement_id  = "AllowExecutionFromAPIGateway-${var.environment}"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.sentiment_analyzer.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_api_gateway_rest_api.main.execution_arn}/*/*"
-}
-
-resource "aws_lambda_permission" "stock_data_fetcher_api_gateway" {
-  statement_id  = "AllowExecutionFromAPIGateway-${var.environment}"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.stock_data_fetcher.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_api_gateway_rest_api.main.execution_arn}/*/*"
-}
-
-resource "aws_lambda_permission" "prediction_engine_api_gateway" {
-  statement_id  = "AllowExecutionFromAPIGateway-${var.environment}"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.prediction_engine.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_api_gateway_rest_api.main.execution_arn}/*/*"
 }
