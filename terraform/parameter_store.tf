@@ -44,3 +44,15 @@ resource "aws_ssm_parameter" "earnings_table_name" {
     Environment = var.environment
   })
 }
+
+# Store Alpha Vantage API key in Parameter Store
+resource "aws_ssm_parameter" "alpha_vantage_api_key" {
+  name  = "/${var.project_name}/${var.environment}/alpha-vantage-api-key"
+  type  = "SecureString"
+  value = var.alpha_vantage_api_key
+  
+  tags = merge(var.tags, {
+    Name        = "${var.project_name}-alpha-vantage-api-key-${var.environment}"
+    Environment = var.environment
+  })
+}

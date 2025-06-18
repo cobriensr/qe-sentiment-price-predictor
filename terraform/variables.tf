@@ -69,3 +69,9 @@ variable "fmp_api_key" {
   type        = string
   sensitive   = true
 }
+
+variable "alpha_vantage_api_key" {
+  description = "Alpha Vantage API key"
+  type        = string
+  sensitive   = true
+}
