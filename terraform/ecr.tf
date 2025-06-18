@@ -105,11 +105,11 @@ resource "docker_image" "lambda_image" {
   triggers = {
     # This should rebuild when your code changes
     services_hash = sha1(join("", [
-      for f in fileset("./backend/services", "*.py") : 
-      filesha1("./backend/services/${f}")
+      for f in fileset("../backend/services", "*.py") : 
+      filesha1("../backend/services/${f}")
     ]))
-    requirements_hash = filesha1("./backend/services/requirements.txt")
-    dockerfile_hash = filesha1("./backend/services/Dockerfile")
+    requirements_hash = filesha1("../backend/services/requirements.txt")
+    dockerfile_hash = filesha1("../backend/services/Dockerfile")
   }
 }
 
