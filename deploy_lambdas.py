@@ -343,7 +343,7 @@ def debug_ecr_setup(repository_uri):
         print(f"Output: {e.stdout}")
         print(f"Error: {e.stderr}")
         return False
-    except (OSError) as e:
+    except OSError as e:
         print(f"\nUnexpected error during ECR setup check: {str(e)}")
         return False
 
