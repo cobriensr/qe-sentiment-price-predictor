@@ -96,37 +96,6 @@ data "archive_file" "lambda_placeholder" {
   }
 }
 
-# CloudWatch Log Groups for Lambda functions
-resource "aws_cloudwatch_log_group" "sentiment_analyzer_logs" {
-  name              = "/aws/lambda/${aws_lambda_function.sentiment_analyzer.function_name}"
-  retention_in_days = 14
-
-  tags = merge(var.tags, {
-    Name        = "${var.project_name}-sentiment-analyzer-logs-${var.environment}"
-    Environment = var.environment
-  })
-}
-
-resource "aws_cloudwatch_log_group" "stock_data_fetcher_logs" {
-  name              = "/aws/lambda/${aws_lambda_function.stock_data_fetcher.function_name}"
-  retention_in_days = 14
-
-  tags = merge(var.tags, {
-    Name        = "${var.project_name}-stock-data-fetcher-logs-${var.environment}"
-    Environment = var.environment
-  })
-}
-
-resource "aws_cloudwatch_log_group" "prediction_engine_logs" {
-  name              = "/aws/lambda/${aws_lambda_function.prediction_engine.function_name}"
-  retention_in_days = 14
-
-  tags = merge(var.tags, {
-    Name        = "${var.project_name}-prediction-engine-logs-${var.environment}"
-    Environment = var.environment
-  })
-}
-
 # Lambda permissions for API Gateway to invoke functions
 resource "aws_lambda_permission" "sentiment_analyzer_api_permission" {
   statement_id  = "AllowExecutionFromAPIGateway"
@@ -151,3 +120,46 @@ resource "aws_lambda_permission" "prediction_engine_api_permission" {
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_api_gateway_rest_api.main.execution_arn}/*/*"
 }
+
+# Lambda function using container image
+resource "aws_lambda_function" "earnings_calendar_lambda" {
+  image_uri    = "${aws_ecr_repository.lambda_repo.repository_url}:latest"
+  package_type = "Image"
+  function_name = "${var.project_name}-earnings-calendar-${var.environment}"
+  role         = aws_iam_role.earnings_lambda_role.arn
+  timeout      = 300
+  memory_size  = 256
+
+  # THIS IS WHERE THE ENVIRONMENT BLOCK GOES
+  environment {
+    variables = {
+      FMP_API_KEY              = var.fmp_api_key
+      EARNINGS_CALENDAR_TABLE  = aws_dynamodb_table.earnings_cache.name
+      PROJECT_NAME             = var.project_name
+      ENVIRONMENT             = var.environment
+      AWS_REGION              = data.aws_region.current.name
+    }
+  }
+
+  depends_on = [
+    docker_registry_image.lambda_image,
+    aws_iam_role_policy_attachment.earnings_lambda_basic_execution,
+    aws_iam_role_policy_attachment.earnings_lambda_dynamodb_policy_attachment,
+  ]
+
+  tags = merge(var.tags, {
+    Name        = "${var.project_name}-earnings-calendar-${var.environment}"
+    Environment = var.environment
+    Purpose     = "Earnings calendar data processor"
+  })
+}
+
+# Lambda permission for EventBridge
+resource "aws_lambda_permission" "allow_eventbridge" {
+  statement_id  = "AllowExecutionFromEventBridge"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.earnings_calendar_lambda.function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.earnings_daily_schedule.arn
+}
+

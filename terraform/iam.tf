@@ -251,3 +251,63 @@ resource "aws_iam_user_policy_attachment" "github_actions_deploy_policy_attachme
   user       = aws_iam_user.github_actions_deploy.name
   policy_arn = aws_iam_policy.github_actions_deploy_policy.arn
 }
+
+# IAM Policy for Lambda - DynamoDB permissions
+resource "aws_iam_policy" "earnings_lambda_dynamodb_policy" {
+  name        = "${var.project_name}-earnings-lambda-dynamodb-policy-${var.environment}"
+  description = "IAM policy for earnings lambda to access DynamoDB"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "dynamodb:PutItem",
+          "dynamodb:BatchWriteItem",
+          "dynamodb:GetItem",
+          "dynamodb:Query"
+        ]
+        Resource = [
+          aws_dynamodb_table.earnings_cache.arn,
+          "${aws_dynamodb_table.earnings_cache.arn}/index/*"
+        ]
+      }
+    ]
+  })
+}
+
+# Attach DynamoDB policy to role
+resource "aws_iam_role_policy_attachment" "earnings_lambda_dynamodb_policy_attachment" {
+  role       = aws_iam_role.earnings_lambda_role.name
+  policy_arn = aws_iam_policy.earnings_lambda_dynamodb_policy.arn
+}
+
+# Attach basic Lambda execution policy
+resource "aws_iam_role_policy_attachment" "earnings_lambda_basic_execution" {
+  role       = aws_iam_role.earnings_lambda_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role" "earnings_lambda_role" {
+  name = "${var.project_name}-earnings-lambda-role-${var.environment}"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+      }
+    ]
+  })
+
+  tags = merge(var.tags, {
+    Name        = "${var.project_name}-earnings-lambda-role-${var.environment}"
+    Environment = var.environment
+    Purpose     = "Earnings calendar lambda execution role"
+  })
+}

@@ -67,6 +67,16 @@ output "prediction_engine_function_arn" {
   value       = aws_lambda_function.prediction_engine.arn
 }
 
+output "earnings_lambda_function_name" {
+  description = "Name of the earnings calendar lambda function"
+  value       = aws_lambda_function.earnings_calendar_lambda.function_name
+}
+
+output "earnings_lambda_function_arn" {
+  description = "ARN of the earnings calendar lambda function"
+  value       = aws_lambda_function.earnings_calendar_lambda.arn
+}
+
 # DynamoDB table outputs
 output "earnings_cache_table_name" {
   description = "Name of the earnings cache DynamoDB table"
@@ -164,7 +174,7 @@ output "github_actions_secret_access_key" {
   sensitive   = true
 }
 
-# https outputs
+# Https outputs
 output "http_url" {
   description = "HTTP URL (redirects to HTTPS)"
   value       = "http://${aws_lb.main.dns_name}"

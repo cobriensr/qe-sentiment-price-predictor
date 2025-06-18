@@ -63,3 +63,9 @@ variable "docker_context_path" {
   description = "Path to the Docker context directory"
   type        = string
 }
+
+variable "fmp_api_key" {
+  description = "Financial Modeling Prep API key"
+  type        = string
+  sensitive   = true
+}
