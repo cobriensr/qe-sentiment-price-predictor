@@ -8,6 +8,8 @@ This project analyzes quarterly earnings call transcripts to predict stock perfo
 
 ## Landing Page
 
+[**Live Demo**](https://nextjs-app-alb-1686302174.us-east-1.elb.amazonaws.com/)
+
 ![Landing Page](frontend/assets/landing-page.png)
 
 ## 🏗️ Architecture
