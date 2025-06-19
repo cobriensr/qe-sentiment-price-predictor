@@ -166,3 +166,62 @@ resource "aws_dynamodb_table" "stock_prices" {
     Purpose     = "Stock price data storage"
   })
 }
+
+# DynamoDB table for storing earnings transcript metadata
+resource "aws_dynamodb_table" "earnings_transcripts" {
+  name           = "${var.project_name}-earnings-transcripts-${var.environment}"
+  billing_mode   = "PAY_PER_REQUEST"
+  hash_key       = "symbol"
+  range_key      = "quarter"
+
+  attribute {
+    name = "symbol"
+    type = "S"
+  }
+
+  attribute {
+    name = "quarter"
+    type = "S"
+  }
+
+  attribute {
+    name = "created_at"
+    type = "S"
+  }
+
+  # Global Secondary Index for querying by quarter across all symbols
+  global_secondary_index {
+    name     = "quarter-index"
+    hash_key = "quarter"
+    projection_type = "ALL"
+  }
+
+  # Global Secondary Index for querying recent transcripts
+  global_secondary_index {
+    name     = "created-at-index"
+    hash_key = "created_at"
+    projection_type = "ALL"
+  }
+
+  # Enable point-in-time recovery
+  point_in_time_recovery {
+    enabled = true
+  }
+
+  # Server-side encryption
+  server_side_encryption {
+    enabled = true
+  }
+
+  # TTL attribute for automatic cleanup
+  ttl {
+    attribute_name = "ttl"
+    enabled        = true
+  }
+
+  tags = merge(var.tags, {
+    Name        = "${var.project_name}-earnings-transcripts-${var.environment}"
+    Environment = var.environment
+    Purpose     = "Earnings transcript metadata storage"
+  })
+}

@@ -9,7 +9,7 @@ resource "aws_s3_bucket" "ml_models" {
   })
 }
 
-# S3 bucket for storing earnings data cache
+# S3 bucket for storing earnings data
 resource "aws_s3_bucket" "earnings_data" {
   bucket = "${var.project_name}-earnings-data-${var.environment}-${random_string.bucket_suffix.result}"
 

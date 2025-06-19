@@ -1,3 +1,14 @@
+# Create placeholder zip file for initial deployment
+data "archive_file" "lambda_placeholder" {
+  type        = "zip"
+  output_path = "placeholder.zip"
+
+  source {
+    content  = "def handler(event, context): return {'statusCode': 200, 'body': 'Placeholder function'}"
+    filename = "placeholder.py"
+  }
+}
+
 # Lambda function for sentiment analysis
 resource "aws_lambda_function" "sentiment_analyzer" {
   function_name = "${var.project_name}-sentiment-analyzer-${var.environment}"
@@ -17,8 +28,16 @@ resource "aws_lambda_function" "sentiment_analyzer" {
       ML_MODELS_BUCKET     = aws_s3_bucket.ml_models.bucket
       EARNINGS_DATA_BUCKET = aws_s3_bucket.earnings_data.bucket
       DYNAMODB_TABLE       = aws_dynamodb_table.earnings_cache.name
+      PROJECT_NAME         = var.project_name
     }
   }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.lambda_basic_execution,
+    aws_iam_role_policy_attachment.lambda_s3_policy_attachment,
+    aws_iam_role_policy_attachment.lambda_dynamodb_policy_attachment,
+    aws_iam_role_policy_attachment.lambda_ssm_policy_attachment,
+  ]
 
   tags = merge(var.tags, {
     Name        = "${var.project_name}-sentiment-analyzer-${var.environment}"
@@ -46,8 +65,16 @@ resource "aws_lambda_function" "stock_data_fetcher" {
       ML_MODELS_BUCKET     = aws_s3_bucket.ml_models.bucket
       EARNINGS_DATA_BUCKET = aws_s3_bucket.earnings_data.bucket
       DYNAMODB_TABLE       = aws_dynamodb_table.earnings_cache.name
+      PROJECT_NAME         = var.project_name
     }
   }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.lambda_basic_execution,
+    aws_iam_role_policy_attachment.lambda_s3_policy_attachment,
+    aws_iam_role_policy_attachment.lambda_dynamodb_policy_attachment,
+    aws_iam_role_policy_attachment.lambda_ssm_policy_attachment,
+  ]
 
   tags = merge(var.tags, {
     Name        = "${var.project_name}-stock-data-fetcher-${var.environment}"
@@ -75,8 +102,16 @@ resource "aws_lambda_function" "prediction_engine" {
       ML_MODELS_BUCKET     = aws_s3_bucket.ml_models.bucket
       EARNINGS_DATA_BUCKET = aws_s3_bucket.earnings_data.bucket
       DYNAMODB_TABLE       = aws_dynamodb_table.earnings_cache.name
+      PROJECT_NAME         = var.project_name
     }
   }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.lambda_basic_execution,
+    aws_iam_role_policy_attachment.lambda_s3_policy_attachment,
+    aws_iam_role_policy_attachment.lambda_dynamodb_policy_attachment,
+    aws_iam_role_policy_attachment.lambda_ssm_policy_attachment,
+  ]
 
   tags = merge(var.tags, {
     Name        = "${var.project_name}-prediction-engine-${var.environment}"
@@ -85,52 +120,15 @@ resource "aws_lambda_function" "prediction_engine" {
   })
 }
 
-# Create placeholder zip file for initial deployment
-data "archive_file" "lambda_placeholder" {
-  type        = "zip"
-  output_path = "placeholder.zip"
-
-  source {
-    content  = "def handler(event, context): return {'statusCode': 200, 'body': 'Placeholder function'}"
-    filename = "placeholder.py"
-  }
-}
-
-# Lambda permissions for API Gateway to invoke functions
-resource "aws_lambda_permission" "sentiment_analyzer_api_permission" {
-  statement_id  = "AllowExecutionFromAPIGateway"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.sentiment_analyzer.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_api_gateway_rest_api.main.execution_arn}/*/*"
-}
-
-resource "aws_lambda_permission" "stock_data_fetcher_api_permission" {
-  statement_id  = "AllowExecutionFromAPIGateway"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.stock_data_fetcher.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_api_gateway_rest_api.main.execution_arn}/*/*"
-}
-
-resource "aws_lambda_permission" "prediction_engine_api_permission" {
-  statement_id  = "AllowExecutionFromAPIGateway"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.prediction_engine.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_api_gateway_rest_api.main.execution_arn}/*/*"
-}
-
-# Lambda function using container image
+# Earnings Calendar Lambda Function (Docker-based)
 resource "aws_lambda_function" "earnings_calendar_lambda" {
-  image_uri     = "${aws_ecr_repository.lambda_repo.repository_url}:latest"
+  image_uri     = "${aws_ecr_repository.fmp_lambda_repo.repository_url}:latest"
   package_type  = "Image"
   function_name = "${var.project_name}-earnings-calendar-${var.environment}"
   role          = aws_iam_role.earnings_lambda_role.arn
-  timeout       = 300
-  memory_size   = 256
+  timeout       = 300 # 5 minutes for API calls and data processing
+  memory_size   = 256 # Sufficient memory for data processing
 
-  # THIS IS WHERE THE ENVIRONMENT BLOCK GOES
   environment {
     variables = {
       FMP_API_KEY             = var.fmp_api_key
@@ -141,9 +139,11 @@ resource "aws_lambda_function" "earnings_calendar_lambda" {
   }
 
   depends_on = [
-    docker_registry_image.lambda_image,
+    docker_registry_image.fmp_lambda_image,
     aws_iam_role_policy_attachment.earnings_lambda_basic_execution,
-    aws_iam_role_policy_attachment.earnings_lambda_dynamodb_policy_attachment,
+    aws_iam_role_policy_attachment.earnings_lambda_s3_attachment,
+    aws_iam_role_policy_attachment.earnings_lambda_dynamodb_attachment,
+    aws_iam_role_policy_attachment.earnings_lambda_ssm_attachment,
   ]
 
   tags = merge(var.tags, {
@@ -153,12 +153,37 @@ resource "aws_lambda_function" "earnings_calendar_lambda" {
   })
 }
 
-# Lambda permission for EventBridge
-resource "aws_lambda_permission" "allow_eventbridge" {
-  statement_id  = "AllowExecutionFromEventBridge"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.earnings_calendar_lambda.function_name
-  principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.earnings_daily_schedule.arn
-}
+# Earnings Transcripts Lambda Function (Docker-based)
+resource "aws_lambda_function" "earnings_transcripts_lambda" {
+  image_uri     = "${aws_ecr_repository.alpha_vantage_lambda_repo.repository_url}:latest"
+  package_type  = "Image"
+  function_name = "${var.project_name}-earnings-transcripts-${var.environment}"
+  role          = aws_iam_role.earnings_transcripts_lambda_role.arn
+  timeout       = 900  # 15 minutes for longer processing tasks
+  memory_size   = 512  # More memory for transcript processing
 
+  environment {
+    variables = {
+      ALPHA_VANTAGE_API_KEY       = var.alpha_vantage_api_key
+      EARNINGS_TRANSCRIPTS_TABLE  = aws_dynamodb_table.earnings_transcripts.name
+      EARNINGS_DATA_BUCKET        = aws_s3_bucket.earnings_data.bucket
+      ML_MODELS_BUCKET            = aws_s3_bucket.ml_models.bucket
+      PROJECT_NAME                = var.project_name
+      ENVIRONMENT                 = var.environment
+    }
+  }
+
+  depends_on = [
+    docker_registry_image.alpha_vantage_lambda_image,
+    aws_iam_role_policy_attachment.earnings_transcripts_lambda_basic_execution,
+    aws_iam_role_policy_attachment.earnings_transcripts_lambda_s3_attachment,
+    aws_iam_role_policy_attachment.earnings_transcripts_lambda_dynamodb_attachment,
+    aws_iam_role_policy_attachment.earnings_transcripts_lambda_ssm_attachment,
+  ]
+
+  tags = merge(var.tags, {
+    Name        = "${var.project_name}-earnings-transcripts-${var.environment}"
+    Environment = var.environment
+    Purpose     = "Earnings transcripts data processor with dual storage"
+  })
+}

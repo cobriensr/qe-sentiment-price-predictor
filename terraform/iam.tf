@@ -1,4 +1,4 @@
-# IAM role for Lambda functions
+# IAM role for Lambda functions (shared)
 resource "aws_iam_role" "lambda_execution_role" {
   name = "${var.project_name}-lambda-execution-role-${var.environment}"
 
@@ -65,7 +65,7 @@ resource "aws_iam_role_policy_attachment" "lambda_s3_policy_attachment" {
   policy_arn = aws_iam_policy.lambda_s3_policy.arn
 }
 
-# Custom policy for DynamoDB access (for future phases)
+# Custom policy for DynamoDB access
 resource "aws_iam_policy" "lambda_dynamodb_policy" {
   name        = "${var.project_name}-lambda-dynamodb-policy-${var.environment}"
   description = "IAM policy for Lambda functions to access DynamoDB tables"
@@ -81,11 +81,14 @@ resource "aws_iam_policy" "lambda_dynamodb_policy" {
           "dynamodb:UpdateItem",
           "dynamodb:DeleteItem",
           "dynamodb:Query",
-          "dynamodb:Scan"
+          "dynamodb:Scan",
+          "dynamodb:BatchWriteItem"
         ]
         Resource = [
           aws_dynamodb_table.earnings_cache.arn,
-          "${aws_dynamodb_table.earnings_cache.arn}/index/*"
+          "${aws_dynamodb_table.earnings_cache.arn}/index/*",
+          aws_dynamodb_table.earnings_transcripts.arn,
+          "${aws_dynamodb_table.earnings_transcripts.arn}/index/*"
         ]
       }
     ]
@@ -101,6 +104,39 @@ resource "aws_iam_policy" "lambda_dynamodb_policy" {
 resource "aws_iam_role_policy_attachment" "lambda_dynamodb_policy_attachment" {
   role       = aws_iam_role.lambda_execution_role.name
   policy_arn = aws_iam_policy.lambda_dynamodb_policy.arn
+}
+
+# Custom policy for SSM Parameter Store access
+resource "aws_iam_policy" "lambda_ssm_policy" {
+  name        = "${var.project_name}-lambda-ssm-policy-${var.environment}"
+  description = "IAM policy for Lambda functions to access Parameter Store"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ssm:GetParameter",
+          "ssm:GetParameters"
+        ]
+        Resource = [
+          "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/${var.project_name}/${var.environment}/*"
+        ]
+      }
+    ]
+  })
+
+  tags = merge(var.tags, {
+    Name        = "${var.project_name}-lambda-ssm-policy-${var.environment}"
+    Environment = var.environment
+  })
+}
+
+# Attach SSM policy to Lambda role
+resource "aws_iam_role_policy_attachment" "lambda_ssm_policy_attachment" {
+  role       = aws_iam_role.lambda_execution_role.name
+  policy_arn = aws_iam_policy.lambda_ssm_policy.arn
 }
 
 # IAM role for API Gateway to invoke Lambda
@@ -140,9 +176,7 @@ resource "aws_iam_policy" "api_gateway_lambda_policy" {
           "lambda:InvokeFunction"
         ]
         Resource = [
-          aws_lambda_function.sentiment_analyzer.arn,
-          aws_lambda_function.stock_data_fetcher.arn,
-          aws_lambda_function.prediction_engine.arn
+          "arn:aws:lambda:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:function:${var.project_name}-*-${var.environment}"
         ]
       }
     ]
@@ -221,8 +255,7 @@ resource "aws_iam_policy" "github_actions_deploy_policy" {
           "iam:PassRole"
         ]
         Resource = [
-          aws_iam_role.ecs_task_execution_role.arn,
-          # Add any other ECS task roles you might have
+          aws_iam_role.ecs_task_execution_role.arn
         ]
       },
       {
@@ -235,6 +268,18 @@ resource "aws_iam_policy" "github_actions_deploy_policy" {
           "logs:DescribeLogStreams"
         ]
         Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "lambda:UpdateFunctionCode",
+          "lambda:UpdateFunctionConfiguration",
+          "lambda:GetFunction",
+          "lambda:InvokeFunction"
+        ]
+        Resource = [
+          "arn:aws:lambda:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:function:${var.project_name}-*-${var.environment}"
+        ]
       }
     ]
   })
@@ -252,43 +297,31 @@ resource "aws_iam_user_policy_attachment" "github_actions_deploy_policy_attachme
   policy_arn = aws_iam_policy.github_actions_deploy_policy.arn
 }
 
-# IAM Policy for Lambda - DynamoDB permissions
-resource "aws_iam_policy" "earnings_lambda_dynamodb_policy" {
-  name        = "${var.project_name}-earnings-lambda-dynamodb-policy-${var.environment}"
-  description = "IAM policy for earnings lambda to access DynamoDB"
+# ECS Task Execution Role
+resource "aws_iam_role" "ecs_task_execution_role" {
+  name = "${var.app_name}-ecs-task-execution-role"
 
-  policy = jsonencode({
+  assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
+        Action = "sts:AssumeRole"
         Effect = "Allow"
-        Action = [
-          "dynamodb:PutItem",
-          "dynamodb:BatchWriteItem",
-          "dynamodb:GetItem",
-          "dynamodb:Query"
-        ]
-        Resource = [
-          aws_dynamodb_table.earnings_cache.arn,
-          "${aws_dynamodb_table.earnings_cache.arn}/index/*"
-        ]
+        Principal = {
+          Service = "ecs-tasks.amazonaws.com"
+        }
       }
     ]
   })
 }
 
-# Attach DynamoDB policy to role
-resource "aws_iam_role_policy_attachment" "earnings_lambda_dynamodb_policy_attachment" {
-  role       = aws_iam_role.earnings_lambda_role.name
-  policy_arn = aws_iam_policy.earnings_lambda_dynamodb_policy.arn
+# Attach the Amazon ECS Task Execution Role Policy
+resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
+  role       = aws_iam_role.ecs_task_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
-# Attach basic Lambda execution policy
-resource "aws_iam_role_policy_attachment" "earnings_lambda_basic_execution" {
-  role       = aws_iam_role.earnings_lambda_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-}
-
+# Specific IAM roles for individual Lambda functions
 resource "aws_iam_role" "earnings_lambda_role" {
   name = "${var.project_name}-earnings-lambda-role-${var.environment}"
 
@@ -312,34 +345,9 @@ resource "aws_iam_role" "earnings_lambda_role" {
   })
 }
 
-# Lambda permissions for API Gateway to invoke functions
-resource "aws_lambda_permission" "sentiment_analyzer_api_gateway" {
-  statement_id  = "AllowExecutionFromAPIGateway-${var.environment}"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.sentiment_analyzer.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_api_gateway_rest_api.main.execution_arn}/*/*"
-}
-
-resource "aws_lambda_permission" "stock_data_fetcher_api_gateway" {
-  statement_id  = "AllowExecutionFromAPIGateway-${var.environment}"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.stock_data_fetcher.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_api_gateway_rest_api.main.execution_arn}/*/*"
-}
-
-resource "aws_lambda_permission" "prediction_engine_api_gateway" {
-  statement_id  = "AllowExecutionFromAPIGateway-${var.environment}"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.prediction_engine.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_api_gateway_rest_api.main.execution_arn}/*/*"
-}
-
-# ECS Task Execution Role
-resource "aws_iam_role" "ecs_task_execution_role" {
-  name = "${var.app_name}-ecs-task-execution-role"
+# IAM role for earnings transcripts Lambda function
+resource "aws_iam_role" "earnings_transcripts_lambda_role" {
+  name = "${var.project_name}-earnings-transcripts-lambda-role-${var.environment}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -348,14 +356,120 @@ resource "aws_iam_role" "ecs_task_execution_role" {
         Action = "sts:AssumeRole"
         Effect = "Allow"
         Principal = {
-          Service = "ecs-tasks.amazonaws.com"
+          Service = "lambda.amazonaws.com"
         }
       }
     ]
   })
+
+  tags = merge(var.tags, {
+    Name        = "${var.project_name}-earnings-transcripts-lambda-role-${var.environment}"
+    Environment = var.environment
+    Purpose     = "Earnings transcripts lambda execution role"
+  })
 }
 
-resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
-  role       = aws_iam_role.ecs_task_execution_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+# Attach basic execution policy to specific Lambda roles
+resource "aws_iam_role_policy_attachment" "earnings_lambda_basic_execution" {
+  role       = aws_iam_role.earnings_lambda_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy_attachment" "earnings_transcripts_lambda_basic_execution" {
+  role       = aws_iam_role.earnings_transcripts_lambda_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+# Attach S3 policy to specific Lambda roles
+resource "aws_iam_role_policy_attachment" "earnings_lambda_s3_attachment" {
+  role       = aws_iam_role.earnings_lambda_role.name
+  policy_arn = aws_iam_policy.lambda_s3_policy.arn
+}
+
+resource "aws_iam_role_policy_attachment" "earnings_transcripts_lambda_s3_attachment" {
+  role       = aws_iam_role.earnings_transcripts_lambda_role.name
+  policy_arn = aws_iam_policy.lambda_s3_policy.arn
+}
+
+# Attach DynamoDB policy to specific Lambda roles
+resource "aws_iam_role_policy_attachment" "earnings_lambda_dynamodb_attachment" {
+  role       = aws_iam_role.earnings_lambda_role.name
+  policy_arn = aws_iam_policy.lambda_dynamodb_policy.arn
+}
+
+resource "aws_iam_role_policy_attachment" "earnings_transcripts_lambda_dynamodb_attachment" {
+  role       = aws_iam_role.earnings_transcripts_lambda_role.name
+  policy_arn = aws_iam_policy.lambda_dynamodb_policy.arn
+}
+
+# Attach SSM policy to specific Lambda roles
+resource "aws_iam_role_policy_attachment" "earnings_lambda_ssm_attachment" {
+  role       = aws_iam_role.earnings_lambda_role.name
+  policy_arn = aws_iam_policy.lambda_ssm_policy.arn
+}
+
+resource "aws_iam_role_policy_attachment" "earnings_transcripts_lambda_ssm_attachment" {
+  role       = aws_iam_role.earnings_transcripts_lambda_role.name
+  policy_arn = aws_iam_policy.lambda_ssm_policy.arn
+}
+
+# Lambda permissions for API Gateway to invoke functions (using wildcard patterns for flexibility)
+resource "aws_lambda_permission" "earnings_calendar_api_gateway" {
+  statement_id  = "AllowExecutionFromAPIGateway-earnings-calendar"
+  action        = "lambda:InvokeFunction"
+  function_name = "${var.project_name}-earnings-calendar-${var.environment}"
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "arn:aws:execute-api:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*/*/*"
+}
+
+resource "aws_lambda_permission" "earnings_transcripts_api_gateway" {
+  statement_id  = "AllowExecutionFromAPIGateway-earnings-transcripts"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.earnings_transcripts_lambda.function_name  # Reference the resource
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "arn:aws:execute-api:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*/*/*"
+
+  depends_on = [aws_lambda_function.earnings_transcripts_lambda]
+}
+resource "aws_lambda_permission" "sentiment_analyzer_api_gateway" {
+  statement_id  = "AllowExecutionFromAPIGateway-sentiment"
+  action        = "lambda:InvokeFunction"
+  function_name = "${var.project_name}-sentiment-analyzer-${var.environment}"
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "arn:aws:execute-api:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*/*/*"
+}
+
+resource "aws_lambda_permission" "stock_data_fetcher_api_gateway" {
+  statement_id  = "AllowExecutionFromAPIGateway-stock-data"
+  action        = "lambda:InvokeFunction"
+  function_name = "${var.project_name}-stock-data-fetcher-${var.environment}"
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "arn:aws:execute-api:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*/*/*"
+}
+
+resource "aws_lambda_permission" "prediction_engine_api_gateway" {
+  statement_id  = "AllowExecutionFromAPIGateway-prediction"
+  action        = "lambda:InvokeFunction"
+  function_name = "${var.project_name}-prediction-engine-${var.environment}"
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "arn:aws:execute-api:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*/*/*"
+}
+
+# Lambda permissions for EventBridge
+resource "aws_lambda_permission" "earnings_calendar_eventbridge" {
+  statement_id  = "AllowExecutionFromEventBridge-earnings-calendar"
+  action        = "lambda:InvokeFunction"
+  function_name = "${var.project_name}-earnings-calendar-${var.environment}"
+  principal     = "events.amazonaws.com"
+  source_arn    = "arn:aws:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rule/${var.project_name}-earnings-daily-${var.environment}"
+}
+
+resource "aws_lambda_permission" "earnings_transcripts_eventbridge" {
+  statement_id  = "AllowExecutionFromEventBridge-earnings-transcripts"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.earnings_transcripts_lambda.function_name  # Reference the resource
+  principal     = "events.amazonaws.com"
+  source_arn    = "arn:aws:events:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:rule/${var.project_name}-earnings-transcripts-schedule-${var.environment}"
+
+  depends_on = [aws_lambda_function.earnings_transcripts_lambda]
 }

@@ -56,3 +56,38 @@ resource "aws_ssm_parameter" "alpha_vantage_api_key" {
     Environment = var.environment
   })
 }
+
+# Store the transcript table name in Parameter Store
+resource "aws_ssm_parameter" "transcript_table_name" {
+  name  = "/${var.project_name}/${var.environment}/earnings-transcripts-table"
+  type  = "String"
+  value = aws_dynamodb_table.earnings_transcripts.name
+  
+  tags = merge(var.tags, {
+    Name        = "${var.project_name}-transcript-table-name-${var.environment}"
+    Environment = var.environment
+  })
+}
+
+# Store S3 bucket names in Parameter Store for Lambda access
+resource "aws_ssm_parameter" "earnings_data_bucket" {
+  name  = "/${var.project_name}/${var.environment}/earnings-data-bucket"
+  type  = "String"
+  value = aws_s3_bucket.earnings_data.bucket
+  
+  tags = merge(var.tags, {
+    Name        = "${var.project_name}-earnings-data-bucket-${var.environment}"
+    Environment = var.environment
+  })
+}
+
+resource "aws_ssm_parameter" "ml_models_bucket" {
+  name  = "/${var.project_name}/${var.environment}/ml-models-bucket"
+  type  = "String"
+  value = aws_s3_bucket.ml_models.bucket
+  
+  tags = merge(var.tags, {
+    Name        = "${var.project_name}-ml-models-bucket-${var.environment}"
+    Environment = var.environment
+  })
+}
